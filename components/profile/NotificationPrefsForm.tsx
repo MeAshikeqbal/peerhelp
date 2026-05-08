@@ -55,12 +55,20 @@ export function NotificationPrefsForm({ initialPrefs }: NotificationPrefsFormPro
   const [saving, setSaving] = useState<PrefKey | null>(null);
 
   async function toggle(key: PrefKey) {
-    const next = !prefs[key];
+    const previous = prefs[key];
+    const next = !previous;
     setPrefs((prev) => ({ ...prev, [key]: next }));
     setSaving(key);
-    const supabase = createClient();
-    await upsertNotificationPrefs(supabase, { [key]: next });
-    setSaving(null);
+    try {
+      const supabase = createClient();
+      const { error } = await upsertNotificationPrefs(supabase, { [key]: next });
+      if (error) throw error;
+    } catch (err) {
+      console.error("Failed to save notification preference:", err);
+      setPrefs((prev) => ({ ...prev, [key]: previous }));
+    } finally {
+      setSaving(null);
+    }
   }
 
   return (
