@@ -66,7 +66,7 @@ export function Footer() {
             <Heart
               size={12}
               className="fill-neon-green text-neon-green"
-              aria-label="love"
+              aria-hidden="true"
             />{" "}
             by <span className="font-medium text-foreground">Vision Devs</span>
           </p>
