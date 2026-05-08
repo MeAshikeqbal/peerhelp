@@ -1,12 +1,79 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DecisionPanel } from "./DecisionPanel";
 import { StatusPill } from "@/components/admin/StatusPill";
 
 const BUCKET = "verification-documents";
 const SIGNED_URL_TTL = 60 * 5;
+
+function VerificationDetailSkeleton() {
+  return (
+    <div className="animate-in fade-in space-y-6 duration-300">
+      {/* Back + title */}
+      <div className="flex items-center justify-between">
+        <div>
+          <Skeleton className="mb-3 h-4 w-32" />
+          <Skeleton className="h-9 w-56" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-6">
+          {/* Submitter card */}
+          <div className="rounded-2xl border border-overlay/10 bg-overlay/5 p-5">
+            <Skeleton className="mb-4 h-3 w-24" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {[...Array(8)].map((_, i) => (
+                <div key={i}>
+                  <Skeleton className="mb-1 h-3 w-20" />
+                  <Skeleton className="h-4 w-40" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Document card */}
+          <div className="rounded-2xl border border-overlay/10 bg-overlay/5 p-5">
+            <Skeleton className="mb-4 h-3 w-28" />
+            <Skeleton className="h-[300px] w-full rounded-xl" />
+          </div>
+
+          {/* Audit log card */}
+          <div className="rounded-2xl border border-overlay/10 bg-overlay/5 p-5">
+            <Skeleton className="mb-4 h-3 w-20" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-start justify-between gap-4 border-b border-overlay/5 pb-3 last:border-0">
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                  <Skeleton className="h-3 w-24 shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Decision panel skeleton */}
+        <div className="rounded-2xl border border-overlay/15 bg-overlay/5 p-5">
+          <Skeleton className="mb-2 h-5 w-20" />
+          <Skeleton className="mb-4 h-3 w-56" />
+          <Skeleton className="mb-4 h-24 w-full rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-full rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface DetailRow {
   id: string;
@@ -40,6 +107,18 @@ interface AuditRow {
 }
 
 export default async function AdminVerificationDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<VerificationDetailSkeleton />}>
+      <VerificationDetailContent params={params} />
+    </Suspense>
+  );
+}
+
+async function VerificationDetailContent({
   params,
 }: {
   params: Promise<{ id: string }>;

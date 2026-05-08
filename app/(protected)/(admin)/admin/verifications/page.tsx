@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { ClipboardList } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { StatusPill } from "../../../../../components/admin/StatusPill";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatusPill } from "@/components/admin/StatusPill";
 
 type Status = "pending" | "verified" | "rejected" | "all";
 
@@ -23,7 +26,93 @@ interface Row {
   notes: string | null;
 }
 
-export default async function AdminVerificationsPage({
+function VerificationsTableSkeleton() {
+  return (
+    <div className="animate-in fade-in space-y-6 duration-300">
+      <div className="flex items-center justify-between gap-4">
+        <Skeleton className="h-9 w-44" />
+        <div className="flex gap-2">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-7 w-20 rounded-full" />
+          ))}
+        </div>
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-overlay/10">
+        <table className="w-full text-sm">
+          <thead className="bg-overlay/5">
+            <tr>
+              {[...Array(6)].map((_, i) => (
+                <th key={i} className="px-4 py-3 text-left">
+                  <Skeleton className="h-3 w-16" />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(7)].map((_, i) => (
+              <tr key={i} className="border-t border-overlay/10">
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-32" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-44" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-24" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-6" />
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Skeleton className="ml-auto h-4 w-16" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+const EMPTY_MESSAGES: Record<Status, { title: string; body: string }> = {
+  pending: {
+    title: "Queue is clear",
+    body: "All manual-review submissions have been processed.",
+  },
+  verified: {
+    title: "No approved verifications",
+    body: "No students have been approved via manual review yet.",
+  },
+  rejected: {
+    title: "No rejected verifications",
+    body: "No submissions have been rejected yet.",
+  },
+  all: {
+    title: "No verifications yet",
+    body: "Once students submit manual-review requests they will appear here.",
+  },
+};
+
+function VerificationsEmpty({ status }: { status: Status }) {
+  const { title, body } = EMPTY_MESSAGES[status];
+  return (
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-overlay/10 bg-overlay/[0.02] py-20 text-center">
+      <ClipboardList
+        size={40}
+        strokeWidth={1.25}
+        className="mb-4 text-shade-50/40"
+      />
+      <p className="mb-1 text-base font-medium text-foreground">{title}</p>
+      <p className="text-sm text-shade-50">{body}</p>
+    </div>
+  );
+}
+
+async function VerificationsList({
   searchParams,
 }: {
   searchParams: Promise<{ status?: string }>;
@@ -31,7 +120,8 @@ export default async function AdminVerificationsPage({
   const sp = await searchParams;
   const VALID_STATUSES: Status[] = ["pending", "verified", "rejected", "all"];
   const rawStatus = sp.status as Status | undefined;
-  const status: Status = rawStatus && VALID_STATUSES.includes(rawStatus) ? rawStatus : "pending";
+  const status: Status =
+    rawStatus && VALID_STATUSES.includes(rawStatus) ? rawStatus : "pending";
 
   const supabase = await createClient();
   let query = supabase
@@ -77,7 +167,7 @@ export default async function AdminVerificationsPage({
       {error ? (
         <p className="text-sm text-red-400">Failed to load: {error.message}</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-shade-50">No verifications match.</p>
+        <VerificationsEmpty status={status} />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-overlay/10">
           <table className="w-full text-sm">
@@ -123,5 +213,17 @@ export default async function AdminVerificationsPage({
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminVerificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  return (
+    <Suspense fallback={<VerificationsTableSkeleton />}>
+      <VerificationsList searchParams={searchParams} />
+    </Suspense>
   );
 }
