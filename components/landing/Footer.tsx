@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { Logo } from "@/components/logo";
@@ -61,7 +62,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-2 border-t border-border py-6 text-xs text-muted-foreground sm:flex-row">
-          <p>&copy; <CopyrightYear /> PeerHelp. All rights reserved.</p>
+          <p>&copy; <Suspense fallback="2026"><CopyrightYear /></Suspense> PeerHelp. All rights reserved.</p>
           <p className="flex items-center gap-1.5">
             Made with{" "}
             <Heart
