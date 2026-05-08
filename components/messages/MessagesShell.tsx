@@ -136,7 +136,7 @@ export function MessagesShell({
   }, [threads, search]);
 
   return (
-    <div className="flex overflow-hidden rounded-2xl border border-overlay/10 h-[calc(100svh-13rem)]">
+    <div className="flex overflow-hidden rounded-2xl border border-overlay/10 h-[calc(100svh-12rem)] md:h-[calc(100svh-13rem)]">
       {/* ─── Sidebar ─────────────────────────────────────────── */}
       <div
         className={`flex flex-col border-r border-overlay/10 bg-overlay/[0.02] flex-shrink-0 w-full md:w-72 lg:w-80 ${
