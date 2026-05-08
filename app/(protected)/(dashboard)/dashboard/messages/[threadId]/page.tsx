@@ -48,19 +48,18 @@ export default async function ThreadPage({
     contextType === "deal" ? "/dashboard/deals" : "/dashboard/tutoring/requests";
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <MessageThread
-        threadId={threadId}
-        currentUserId={user.id}
-        counterpartId={counterpartId}
-        counterpartName={counterpartName}
-        initialMessages={messages}
-        initialMyReadAt={myCursor?.last_read_at ?? null}
-        initialTheirReadAt={theirCursor?.last_read_at ?? null}
-        isBlockedByMe={blocked}
-        contextType={contextType}
-        contextHref={contextHref}
-      />
-    </div>
+    <MessageThread
+      threadId={threadId}
+      currentUserId={user.id}
+      counterpartId={counterpartId}
+      counterpartName={counterpartName}
+      initialMessages={messages}
+      initialMyReadAt={myCursor?.last_read_at ?? null}
+      initialTheirReadAt={theirCursor?.last_read_at ?? null}
+      isBlockedByMe={blocked}
+      contextType={contextType}
+      contextId={thread.context_id}
+      contextHref={contextHref}
+    />
   );
 }

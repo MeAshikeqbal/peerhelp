@@ -140,7 +140,14 @@ function RowGroup({
     <>
       <tr className="border-t border-overlay/10 hover:bg-overlay/5">
         <td className="px-4 py-3 text-shade-50">
-          {new Date(report.created_at).toLocaleString()}
+          {new Date(report.created_at).toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })}
         </td>
         <td className="px-4 py-3">{report.reporter_name ?? report.reporter_id.slice(0, 8)}</td>
         <td className="px-4 py-3">{report.reported_name ?? report.reported_user_id.slice(0, 8)}</td>

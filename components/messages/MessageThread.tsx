@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, MoreVertical, Flag, Ban, RotateCw } from "lucide-react";
+import { ArrowLeft, MoreVertical, Flag, Ban, RotateCw, Info } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 import { ReportDialog } from "@/components/messages/ReportDialog";
+import { ContextPreviewDialog } from "@/components/messages/ContextPreviewDialog";
+import Link from "next/link";
 
 type MessageRow = Tables<"messages">;
 
@@ -20,10 +21,19 @@ interface MessageThreadProps {
   initialTheirReadAt: string | null;
   isBlockedByMe: boolean;
   contextType: "deal" | "tutor_request";
+  contextId: string;
   contextHref?: string | null;
 }
 
 const TYPING_TIMEOUT_MS = 3500;
+
+const msgTimeFormatter = new Intl.DateTimeFormat("en-IN", {
+  day: "numeric",
+  month: "short",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+});
 
 export function MessageThread(props: MessageThreadProps) {
   const {
@@ -36,6 +46,7 @@ export function MessageThread(props: MessageThreadProps) {
     initialTheirReadAt,
     isBlockedByMe: initialBlocked,
     contextType,
+    contextId,
     contextHref,
   } = props;
 
@@ -53,13 +64,15 @@ export function MessageThread(props: MessageThreadProps) {
   const [error, setError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [contextOpen, setContextOpen] = useState(false);
   const [blocked, setBlocked] = useState(initialBlocked);
 
   const listRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingSentRef = useRef<number>(0);
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
-  // Track last_read_at locally for "their" cursor in case Realtime payload lags.
+  const channelRef = useRef<ReturnType<
+    ReturnType<typeof createClient>["channel"]
+  > | null>(null);
   void initialMyReadAt;
 
   const supabase = useMemo(() => createClient(), []);
@@ -71,7 +84,7 @@ export function MessageThread(props: MessageThreadProps) {
     }
   }, [messages.length]);
 
-  // Mark thread as read on mount + whenever new incoming messages land.
+  // Mark thread as read.
   const markRead = useCallback(async () => {
     try {
       await fetch(`/api/messages/${threadId}/read`, { method: "POST" });
@@ -169,16 +182,16 @@ export function MessageThread(props: MessageThreadProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ body }),
       });
-      const j = await r.json();
+      const j = (await r.json()) as unknown;
       if (!r.ok) {
-        setError(j?.message ?? "Failed to send");
+        setError((j as { message?: string })?.message ?? "Failed to send");
         return;
       }
       setDraft("");
-      // Optimistic add (in case realtime is slow).
-      if (j?.message?.id) {
+      const sent = (j as { message?: MessageRow }).message;
+      if (sent?.id) {
         setMessages((prev) =>
-          prev.some((m) => m.id === j.message.id) ? prev : [...prev, j.message],
+          prev.some((m) => m.id === sent.id) ? prev : [...prev, sent],
         );
       }
     } catch {
@@ -189,8 +202,11 @@ export function MessageThread(props: MessageThreadProps) {
   }
 
   async function blockCounterpart() {
-    if (!confirm(`Block ${counterpartName}? They won't be able to message you.`)) return;
-    const r = await fetch(`/api/users/${counterpartId}/block`, { method: "POST" });
+    if (!confirm(`Block ${counterpartName}? They won't be able to message you.`))
+      return;
+    const r = await fetch(`/api/users/${counterpartId}/block`, {
+      method: "POST",
+    });
     if (r.ok) {
       setBlocked(true);
       setMenuOpen(false);
@@ -198,20 +214,24 @@ export function MessageThread(props: MessageThreadProps) {
   }
 
   async function unblockCounterpart() {
-    const r = await fetch(`/api/users/${counterpartId}/block`, { method: "DELETE" });
+    const r = await fetch(`/api/users/${counterpartId}/block`, {
+      method: "DELETE",
+    });
     if (r.ok) {
       setBlocked(false);
       setMenuOpen(false);
     }
   }
 
-  // Determine "Read" indicator: latest of MY messages whose created_at <= theirReadAt.
   const lastReadByThem = useMemo(() => {
     if (!theirReadAt) return null;
     const ts = new Date(theirReadAt).getTime();
     let id: string | null = null;
     for (const m of messages) {
-      if (m.sender_id === currentUserId && new Date(m.created_at).getTime() <= ts) {
+      if (
+        m.sender_id === currentUserId &&
+        new Date(m.created_at).getTime() <= ts
+      ) {
         id = m.id;
       }
     }
@@ -219,10 +239,13 @@ export function MessageThread(props: MessageThreadProps) {
   }, [messages, theirReadAt, currentUserId]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] rounded-2xl border border-overlay/10 bg-overlay/[0.02] overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-overlay/10 px-4 py-3 bg-overlay/[0.03]">
+    /* Shell's right pane is flex-1 flex flex-col overflow-hidden.
+       This component fills it completely. */
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* ── Header ─────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-3 border-b border-overlay/10 px-4 py-3 bg-overlay/[0.03] shrink-0">
         <div className="flex items-center gap-3 min-w-0">
+          {/* Back arrow — mobile only */}
           <Link
             href="/dashboard/messages"
             className="p-1.5 rounded-md text-shade-50 hover:text-foreground hover:bg-overlay/5 md:hidden"
@@ -230,35 +253,41 @@ export function MessageThread(props: MessageThreadProps) {
           >
             <ArrowLeft size={16} />
           </Link>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neon-green/10 text-neon-green text-sm font-semibold">
+
+          {/* Avatar */}
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neon-green/10 text-neon-green text-sm font-semibold shrink-0">
             {counterpartName.slice(0, 1).toUpperCase()}
           </div>
+
+          {/* Name + context chip */}
           <div className="min-w-0">
-            <p className="text-sm font-medium truncate">{counterpartName}</p>
-            <p className="text-[10px] uppercase tracking-wider text-shade-50">
-              {contextType === "deal" ? "Deal conversation" : "Tutor request"}
-              {contextHref && (
-                <>
-                  {" · "}
-                  <Link href={contextHref} className="text-neon-green hover:underline">
-                    View context
-                  </Link>
-                </>
-              )}
+            <p className="text-sm font-semibold text-foreground truncate">
+              {counterpartName}
             </p>
+            <button
+              type="button"
+              onClick={() => setContextOpen(true)}
+              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-shade-50 hover:text-neon-green transition-colors"
+            >
+              <Info size={10} />
+              {contextType === "deal" ? "Deal" : "Tutor request"} · View details
+            </button>
           </div>
         </div>
-        <div className="relative">
+
+        {/* ⋮ menu */}
+        <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             className="p-1.5 rounded-md text-shade-50 hover:text-foreground hover:bg-overlay/5"
-            aria-label="More"
+            aria-label="More options"
           >
             <MoreVertical size={16} />
           </button>
+
           {menuOpen && (
-            <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-overlay/10 bg-deep-teal py-1 shadow-lg z-10">
+            <div className="absolute right-0 top-full mt-1 w-44 rounded-xl border border-overlay/10 bg-deep-teal py-1 shadow-xl z-10">
               <button
                 onClick={() => {
                   setReportOpen(true);
@@ -291,13 +320,17 @@ export function MessageThread(props: MessageThreadProps) {
         </div>
       </div>
 
-      {/* Messages */}
-      <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+      {/* ── Messages ───────────────────────────────────────────── */}
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-1"
+      >
         {messages.length === 0 && (
-          <p className="text-center text-xs text-shade-50 py-8">
-            No messages yet. Say hello.
+          <p className="text-center text-xs text-shade-50/60 py-12">
+            No messages yet. Say hello!
           </p>
         )}
+
         {messages.map((m, i) => {
           const mine = m.sender_id === currentUserId;
           const prev = messages[i - 1];
@@ -307,54 +340,53 @@ export function MessageThread(props: MessageThreadProps) {
               new Date(prev.created_at).getTime() >
               5 * 60 * 1000;
           const isLastReadByThem = mine && m.id === lastReadByThem;
+
           return (
             <div key={m.id}>
               {showTime && (
-                <p className="text-center text-[10px] text-shade-50/70 my-2">
-                  {new Date(m.created_at).toLocaleString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
+                <p className="text-center text-[10px] text-shade-50/60 my-3 select-none">
+                  {msgTimeFormatter.format(new Date(m.created_at))}
                 </p>
               )}
-              <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`flex ${mine ? "justify-end" : "justify-start"}`}
+              >
                 <div
-                  className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap break-words ${
+                  className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words leading-relaxed ${
                     mine
-                      ? "bg-neon-green/15 text-foreground border border-neon-green/20"
-                      : "bg-overlay/[0.06] text-foreground border border-overlay/10"
+                      ? "bg-neon-green/[0.14] text-foreground border border-neon-green/20 rounded-br-md"
+                      : "bg-overlay/[0.05] text-foreground border border-overlay/[0.08] rounded-bl-md"
                   }`}
                 >
                   {m.body}
                 </div>
               </div>
               {isLastReadByThem && (
-                <p className="text-right text-[10px] text-shade-50 mt-0.5 mr-1">
-                  Read
+                <p className="text-right text-[10px] text-neon-green/70 mt-0.5 mr-1 select-none">
+                  ✓✓ Read
                 </p>
               )}
             </div>
           );
         })}
+
         {counterpartTyping && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl bg-overlay/[0.06] border border-overlay/10 px-3 py-2 text-xs text-shade-50">
-              <span className="inline-flex gap-0.5">
-                <span className="animate-bounce">.</span>
-                <span className="animate-bounce [animation-delay:120ms]">.</span>
-                <span className="animate-bounce [animation-delay:240ms]">.</span>
+          <div className="flex justify-start pt-1">
+            <div className="rounded-2xl rounded-bl-md bg-overlay/[0.05] border border-overlay/[0.08] px-4 py-2.5 text-xs text-shade-50">
+              <span className="inline-flex gap-0.5 items-end h-3">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-shade-50 animate-bounce" />
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-shade-50 animate-bounce [animation-delay:120ms]" />
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-shade-50 animate-bounce [animation-delay:240ms]" />
               </span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Composer */}
+      {/* ── Composer ───────────────────────────────────────────── */}
       <form
         onSubmit={send}
-        className="border-t border-overlay/10 bg-overlay/[0.03] px-3 py-3"
+        className="shrink-0 border-t border-overlay/10 bg-overlay/[0.02] px-3 py-3"
       >
         {error && (
           <p role="alert" className="mb-2 text-xs text-red-400">
@@ -386,22 +418,23 @@ export function MessageThread(props: MessageThreadProps) {
                   void send(e as unknown as React.FormEvent);
                 }
               }}
-              placeholder="Write a message…"
+              placeholder="Write a message… (Enter to send, Shift+Enter for newline)"
               rows={1}
               maxLength={2000}
-              className="flex-1 resize-none rounded-lg border border-overlay/15 bg-overlay/[0.04] px-3 py-2 text-sm text-foreground placeholder:text-shade-50 focus:border-neon-green/40 focus:outline-none max-h-32"
+              className="flex-1 resize-none rounded-xl border border-overlay/15 bg-overlay/[0.04] px-3 py-2 text-sm text-foreground placeholder:text-shade-50/60 focus:border-neon-green/40 focus:outline-none transition-colors max-h-32"
             />
             <button
               type="submit"
               disabled={sending || draft.trim().length === 0}
-              className="rounded-lg bg-neon-green/15 border border-neon-green/30 px-4 py-2 text-xs font-medium text-neon-green hover:bg-neon-green/20 disabled:opacity-50"
+              className="shrink-0 rounded-xl bg-neon-green/15 border border-neon-green/30 px-4 py-2 text-xs font-semibold text-neon-green hover:bg-neon-green/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              Send
+              {sending ? "…" : "Send"}
             </button>
           </div>
         )}
       </form>
 
+      {/* ── Dialogs ────────────────────────────────────────────── */}
       {reportOpen && (
         <ReportDialog
           threadId={threadId}
@@ -412,6 +445,14 @@ export function MessageThread(props: MessageThreadProps) {
           }}
         />
       )}
+
+      <ContextPreviewDialog
+        open={contextOpen}
+        onOpenChange={setContextOpen}
+        contextType={contextType}
+        contextId={contextId}
+        contextHref={contextHref}
+      />
     </div>
   );
 }
