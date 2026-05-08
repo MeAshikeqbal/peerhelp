@@ -3,15 +3,29 @@ import type { TablesInsert } from "@/lib/supabase/database.types";
 
 export type RatingInsert = TablesInsert<"ratings">;
 
-/** All rating scores for a seller (used to compute avg + count). */
-export async function getSellerRatings(
+/** All rating scores for a user (used to compute avg + count). */
+export async function getUserRatings(
   supabase: DB,
-  sellerUserId: string,
+  userId: string,
 ) {
   return supabase
     .from("ratings")
     .select("score")
-    .eq("rated_user_id", sellerUserId);
+    .eq("rated_user_id", userId);
+}
+
+/** Batch-fetch rating scores for multiple users in one query. */
+export async function getUserRatingsBatch(
+  supabase: DB,
+  userIds: string[],
+) {
+  if (userIds.length === 0) {
+    return { data: [] as { rated_user_id: string; score: number }[], error: null };
+  }
+  return supabase
+    .from("ratings")
+    .select("rated_user_id, score")
+    .in("rated_user_id", userIds);
 }
 
 /** Deal ids that the current user has already rated (prevents double-rating). */
@@ -35,15 +49,15 @@ export async function createRating(
   return supabase.from("ratings").insert(data);
 }
 
-/** Ratings with rater name and comment for a seller's public profile. */
-export async function getSellerRatingsWithComments(
+/** Ratings with rater name and comment for a user's public profile. */
+export async function getUserRatingsWithComments(
   supabase: DB,
-  sellerUserId: string,
+  userId: string,
 ) {
   return supabase
     .from("ratings")
     .select("id, score, comment, created_at, rater_id")
-    .eq("rated_user_id", sellerUserId)
+    .eq("rated_user_id", userId)
     .order("created_at", { ascending: false })
     .limit(20);
 }

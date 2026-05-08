@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getListingById } from "@/utils/query/listings";
 import { getSellerProfile } from "@/utils/query/profiles";
-import { getSellerRatings } from "@/utils/query/ratings";
+import { getUserRatings } from "@/utils/query/ratings";
 
 interface ListingRow {
   id: string;
@@ -82,7 +82,7 @@ async function ListingContent({ params }: { params: Promise<{ id: string }> }) {
 
   const [{ data: sellerData }, { data: ratingAgg }] = await Promise.all([
     getSellerProfile(supabase, listing.user_id),
-    getSellerRatings(supabase, listing.user_id),
+    getUserRatings(supabase, listing.user_id),
   ]);
 
   const seller = sellerData as SellerProfile | null;

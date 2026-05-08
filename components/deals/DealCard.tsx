@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BookOpen, CalendarDays, AlertTriangle, ChevronRight, Wallet, Coins } from "lucide-react";
+import { BookOpen, CalendarDays, AlertTriangle, ChevronRight, Wallet, Coins, Star } from "lucide-react";
 import { DealActions } from "@/components/deals/DealActions";
 import { RatingForm } from "@/components/deals/RatingForm";
 import { ContactReveal } from "@/components/deals/ContactReveal";
@@ -29,6 +29,8 @@ export interface DealCardData {
   role: "buyer" | "seller";
   counterpartName: string;
   counterpartId?: string;
+  counterpartAvgRating?: number;
+  counterpartRatingCount?: number;
   hasRated?: boolean;
   proposed_days?: number | null;
   proposed_start_date?: string | null;
@@ -176,6 +178,16 @@ export function DealCard({ deal }: { deal: DealCardData }) {
             ) : (
               <span className="text-foreground/80 font-medium">{deal.counterpartName}</span>
             )}
+            {deal.counterpartRatingCount && deal.counterpartRatingCount > 0 && deal.counterpartAvgRating !== undefined ? (
+              <span
+                className="inline-flex items-center gap-0.5 ml-1.5 text-foreground/70"
+                aria-label={`${deal.counterpartAvgRating.toFixed(1)} stars from ${deal.counterpartRatingCount} ratings`}
+              >
+                <Star size={10} className="fill-neon-green text-neon-green" />
+                <span className="tabular-nums font-medium">{deal.counterpartAvgRating.toFixed(1)}</span>
+                <span className="opacity-60">({deal.counterpartRatingCount})</span>
+              </span>
+            ) : null}
             <span className="mx-1.5 opacity-30">·</span>
             <span className="tabular-nums">
               {new Date(deal.created_at).toLocaleDateString("en-IN", {

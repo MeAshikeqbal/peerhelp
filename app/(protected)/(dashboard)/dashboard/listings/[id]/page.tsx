@@ -15,7 +15,7 @@ import { ListingStatusActions } from "@/components/listing/ListingStatusActions"
 import { getCurrentUser } from "@/utils/query/auth";
 import { getListingById } from "@/utils/query/listings";
 import { getSellerProfile, getProfilesByIds } from "@/utils/query/profiles";
-import { getSellerRatings } from "@/utils/query/ratings";
+import { getUserRatings } from "@/utils/query/ratings";
 import { getBuyerDealForListing, getDealsByListing, hasBlockingDeal } from "@/utils/query/deals";
 
 interface ListingRow {
@@ -87,7 +87,7 @@ export default async function ListingDetailPage({
 
   const [{ data: sellerData }, { data: ratingAgg }] = await Promise.all([
     getSellerProfile(supabase, listing.user_id),
-    getSellerRatings(supabase, listing.user_id),
+    getUserRatings(supabase, listing.user_id),
   ]);
   const ratingCount = ratingAgg?.length ?? 0;
   const avgRating = ratingCount > 0

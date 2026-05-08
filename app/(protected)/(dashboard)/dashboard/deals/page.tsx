@@ -11,7 +11,7 @@ import { getCurrentUser } from "@/utils/query/auth";
 import { getVerificationStatus, getProfilesByIds } from "@/utils/query/profiles";
 import { getBuyerDeals, getSellerDeals } from "@/utils/query/deals";
 import { getListingsByIds } from "@/utils/query/listings";
-import { getRatedDealIds } from "@/utils/query/ratings";
+import { getRatedDealIds, getUserRatingsBatch } from "@/utils/query/ratings";
 
 interface DealRow {
   id: string;
@@ -171,6 +171,23 @@ async function DealsContent() {
     }
   }
 
+  // Step 5: Batch fetch counterpart ratings (so each card can show their reputation)
+  const counterpartRatings: Record<string, { avg: number; count: number }> = {};
+  if (counterpartIds.length > 0) {
+    const { data: ratingScoreRows } = await getUserRatingsBatch(supabase, counterpartIds);
+    const sums: Record<string, { sum: number; count: number }> = {};
+    for (const row of ratingScoreRows ?? []) {
+      const r = row as { rated_user_id: string; score: number };
+      const acc = sums[r.rated_user_id] ?? { sum: 0, count: 0 };
+      acc.sum += r.score;
+      acc.count += 1;
+      sums[r.rated_user_id] = acc;
+    }
+    for (const [id, { sum, count }] of Object.entries(sums)) {
+      counterpartRatings[id] = { avg: sum / count, count };
+    }
+  }
+
   const allDeals: DealWithRole[] = [
     ...typedBuying.map((d) => ({
       ...d,
@@ -178,6 +195,8 @@ async function DealsContent() {
       role: "buyer" as const,
       counterpartName: nameMap[d.seller_id] ?? "Student",
       counterpartId: d.seller_id,
+      counterpartAvgRating: counterpartRatings[d.seller_id]?.avg,
+      counterpartRatingCount: counterpartRatings[d.seller_id]?.count ?? 0,
       hasRated: ratedDealIds.has(d.id),
     })),
     ...typedSelling.map((d) => ({
@@ -186,6 +205,8 @@ async function DealsContent() {
       role: "seller" as const,
       counterpartName: nameMap[d.buyer_id] ?? "Student",
       counterpartId: d.buyer_id,
+      counterpartAvgRating: counterpartRatings[d.buyer_id]?.avg,
+      counterpartRatingCount: counterpartRatings[d.buyer_id]?.count ?? 0,
       hasRated: ratedDealIds.has(d.id),
     })),
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

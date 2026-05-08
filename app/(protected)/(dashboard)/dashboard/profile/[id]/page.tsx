@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getPublicProfile, getProfilesByIds } from "@/utils/query/profiles";
-import { getSellerRatingsWithComments } from "@/utils/query/ratings";
+import { getUserRatingsWithComments } from "@/utils/query/ratings";
 import { getSellerActiveListings } from "@/utils/query/listings";
 
 type RatingRow = {
@@ -64,13 +64,13 @@ export async function generateMetadata({
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await getPublicProfile(supabase, id);
-  if (!data) return { title: "Seller Profile | PeerHelp" };
+  if (!data) return { title: "Profile | PeerHelp" };
   return {
-    title: `${data.full_name ?? "Seller"} — Profile | PeerHelp`,
+    title: `${data.full_name ?? "Student"} — Profile | PeerHelp`,
   };
 }
 
-export default async function SellerProfilePage({
+export default async function UserProfilePage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -88,7 +88,7 @@ export default async function SellerProfilePage({
   if (!profile) notFound();
 
   const [{ data: ratingsData }, { data: listingsData }] = await Promise.all([
-    getSellerRatingsWithComments(supabase, id),
+    getUserRatingsWithComments(supabase, id),
     getSellerActiveListings(supabase, id),
   ]);
 
