@@ -13,7 +13,11 @@ export type RateLimitType =
   | "deal_create"
   | "deal_status_update"
   | "listing_create"
-  | "rating_create";
+  | "rating_create"
+  | "admin_decision"
+  | "verification_upload"
+  | "tutor_create"
+  | "tutor_request";
 
 export interface RateLimitResult {
   allowed: boolean;

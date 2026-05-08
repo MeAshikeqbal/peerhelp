@@ -20,6 +20,7 @@ const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const navLinks = [
   { href: "/marketplace", label: "Browse marketplace" },
+  { href: "/tutors", label: "Find a tutor" },
 ];
 
 export function PublicNav() {
@@ -51,6 +52,9 @@ export function PublicNav() {
           <ThemeToggle />
           <Button asChild variant="ghost" size="sm">
             <Link href="/marketplace">Browse</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/tutors">Find a tutor</Link>
           </Button>
           {isLoggedIn ? (
             <Button asChild variant="default" size="sm">

@@ -39,6 +39,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       college_directory: {
         Row: {
           college_name: string
@@ -76,13 +100,18 @@ export type Database = {
         Row: {
           college_email: string
           created_at: string
+          document_purge_at: string | null
           email_domain: string
           id: string
+          id_document_path: string | null
           method: string
           notes: string | null
           otp_code: string | null
           otp_expires_at: string | null
           otp_verified_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["verification_status"]
           updated_at: string
           user_id: string
@@ -91,13 +120,18 @@ export type Database = {
         Insert: {
           college_email: string
           created_at?: string
+          document_purge_at?: string | null
           email_domain: string
           id?: string
+          id_document_path?: string | null
           method?: string
           notes?: string | null
           otp_code?: string | null
           otp_expires_at?: string | null
           otp_verified_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["verification_status"]
           updated_at?: string
           user_id: string
@@ -106,13 +140,18 @@ export type Database = {
         Update: {
           college_email?: string
           created_at?: string
+          document_purge_at?: string | null
           email_domain?: string
           id?: string
+          id_document_path?: string | null
           method?: string
           notes?: string | null
           otp_code?: string | null
           otp_expires_at?: string | null
           otp_verified_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["verification_status"]
           updated_at?: string
           user_id?: string
@@ -253,6 +292,8 @@ export type Database = {
           email_deal_declined: boolean
           email_deal_requested: boolean
           email_rating_received: boolean
+          email_tutor_request_received: boolean
+          email_tutor_request_responded: boolean
           updated_at: string
           user_id: string
         }
@@ -263,6 +304,8 @@ export type Database = {
           email_deal_declined?: boolean
           email_deal_requested?: boolean
           email_rating_received?: boolean
+          email_tutor_request_received?: boolean
+          email_tutor_request_responded?: boolean
           updated_at?: string
           user_id: string
         }
@@ -273,6 +316,8 @@ export type Database = {
           email_deal_declined?: boolean
           email_deal_requested?: boolean
           email_rating_received?: boolean
+          email_tutor_request_received?: boolean
+          email_tutor_request_responded?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -463,11 +508,157 @@ export type Database = {
         }
         Relationships: []
       }
+      tutor_profiles: {
+        Row: {
+          availability: string | null
+          bio: string | null
+          created_at: string
+          experience: string | null
+          headline: string
+          hourly_rate: number
+          id: string
+          image_url: string | null
+          languages: string[] | null
+          mode: string
+          status: string
+          subjects: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          experience?: string | null
+          headline: string
+          hourly_rate: number
+          id?: string
+          image_url?: string | null
+          languages?: string[] | null
+          mode: string
+          status?: string
+          subjects: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          experience?: string | null
+          headline?: string
+          hourly_rate?: number
+          id?: string
+          image_url?: string | null
+          languages?: string[] | null
+          mode?: string
+          status?: string
+          subjects?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tutor_session_requests: {
+        Row: {
+          created_at: string
+          id: string
+          learner_user_id: string
+          message: string | null
+          mode: string
+          proposed_when: string | null
+          responded_at: string | null
+          status: string
+          subject: string
+          tutor_profile_id: string
+          tutor_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          learner_user_id: string
+          message?: string | null
+          mode: string
+          proposed_when?: string | null
+          responded_at?: string | null
+          status?: string
+          subject: string
+          tutor_profile_id: string
+          tutor_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          learner_user_id?: string
+          message?: string | null
+          mode?: string
+          proposed_when?: string | null
+          responded_at?: string | null
+          status?: string
+          subject?: string
+          tutor_profile_id?: string
+          tutor_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_session_requests_tutor_profile_id_fkey"
+            columns: ["tutor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verification_audit_log: {
+        Row: {
+          action: Database["public"]["Enums"]["verification_audit_action"]
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          verification_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["verification_audit_action"]
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          verification_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["verification_audit_action"]
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          verification_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_audit_log_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: false
+            referencedRelation: "college_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_decide_verification: {
+        Args: {
+          p_decision: string
+          p_notif_body?: string
+          p_notif_title?: string
+          p_reason?: string
+          p_verification_id: string
+        }
+        Returns: Json
+      }
       create_notification: {
         Args: {
           p_body: string
@@ -509,6 +700,8 @@ export type Database = {
           email_deal_declined: boolean
           email_deal_requested: boolean
           email_rating_received: boolean
+          email_tutor_request_received: boolean
+          email_tutor_request_responded: boolean
           updated_at: string
           user_id: string
         }
@@ -541,6 +734,12 @@ export type Database = {
         }
       }
       get_user_email: { Args: { p_user_id: string }; Returns: string }
+      is_admin: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
+      log_verification_document_upload: {
+        Args: { p_verification_id: string }
+        Returns: undefined
+      }
       mark_notification_read: {
         Args: { p_notification_id: string }
         Returns: undefined
@@ -555,6 +754,14 @@ export type Database = {
       listing_condition: "new" | "good" | "used"
       listing_status: "active" | "reserved" | "sold" | "archived"
       material_type: "notes" | "pyq" | "pdf" | "rental"
+      verification_audit_action:
+        | "approved"
+        | "rejected"
+        | "requested_changes"
+        | "viewed"
+        | "note_added"
+        | "document_purged"
+        | "document_uploaded"
       verification_status: "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
@@ -690,6 +897,15 @@ export const Constants = {
       listing_condition: ["new", "good", "used"],
       listing_status: ["active", "reserved", "sold", "archived"],
       material_type: ["notes", "pyq", "pdf", "rental"],
+      verification_audit_action: [
+        "approved",
+        "rejected",
+        "requested_changes",
+        "viewed",
+        "note_added",
+        "document_purged",
+        "document_uploaded",
+      ],
       verification_status: ["pending", "verified", "rejected"],
     },
   },

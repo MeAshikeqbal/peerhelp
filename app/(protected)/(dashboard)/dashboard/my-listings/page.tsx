@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 import {
   PlusCircle,
   BookOpen,
@@ -12,7 +13,15 @@ import {
   LockKeyhole,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getProfileById } from "@/utils/query/profiles";
 import { getUserListings } from "@/utils/query/listings";
@@ -106,7 +115,46 @@ function ListingRow({ listing }: { listing: Listing }) {
   );
 }
 
-export default async function MyListingsPage() {
+function MyListingsSkeleton() {
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Skeleton className="h-10 w-44 mb-2" />
+          <Skeleton className="h-4 w-56" />
+        </div>
+        <Skeleton className="h-9 w-32 shrink-0 mt-1 rounded-lg" />
+      </div>
+
+      {/* Section label */}
+      <div className="flex items-center gap-2 px-1">
+        <Skeleton className="h-3 w-3 rounded-full" />
+        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-3 w-4" />
+      </div>
+
+      {/* Rows */}
+      <div className="rounded-2xl border border-overlay/[0.07] bg-forest overflow-hidden">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-4 px-5 py-4 border-b border-overlay/[0.05] last:border-0"
+          >
+            <Skeleton className="h-12 w-12 rounded-lg shrink-0" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+            <Skeleton className="h-5 w-16 rounded-full shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function MyListingsContent() {
   const supabase = await createClient();
   const { user, error: userError } = await getCurrentUser(supabase);
   if (userError || !user) redirect("/auth/login");
@@ -140,22 +188,24 @@ export default async function MyListingsPage() {
       </div>
 
       {!hasAny ? (
-        <Empty className="py-20">
-          <EmptyMedia>
-            <BookOpen size={32} className="text-shade-50" />
+        <Empty className="border border-dashed border-overlay/20 py-20">
+          <EmptyMedia variant="icon">
+            <BookOpen size={20} />
           </EmptyMedia>
-          <EmptyHeader>
-            <EmptyTitle>No listings yet</EmptyTitle>
-            <EmptyDescription>
-              Create your first listing to start selling books or notes.
-            </EmptyDescription>
-          </EmptyHeader>
-          <Button asChild>
-            <Link href="/dashboard/listings/create">
-              <PlusCircle size={15} className="mr-1.5" />
-              Create listing
-            </Link>
-          </Button>
+          <EmptyContent>
+            <EmptyHeader>
+              <EmptyTitle>No listings yet</EmptyTitle>
+              <EmptyDescription>
+                Create your first listing to start selling books or notes.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button asChild>
+              <Link href="/dashboard/listings/create">
+                <PlusCircle size={15} className="mr-1.5" />
+                Create listing
+              </Link>
+            </Button>
+          </EmptyContent>
         </Empty>
       ) : (
         <div className="space-y-6">
@@ -186,5 +236,13 @@ export default async function MyListingsPage() {
         </div>
       )}
     </>
+  );
+}
+
+export default function MyListingsPage() {
+  return (
+    <Suspense fallback={<MyListingsSkeleton />}>
+      <MyListingsContent />
+    </Suspense>
   );
 }
