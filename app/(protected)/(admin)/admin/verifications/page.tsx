@@ -18,7 +18,6 @@ interface Row {
   id: string;
   user_id: string;
   college_email: string;
-  email_domain: string;
   status: "pending" | "verified" | "rejected";
   id_document_path: string | null;
   reviewed_at: string | null;
@@ -127,7 +126,7 @@ async function VerificationsList({
   let query = supabase
     .from("college_verifications")
     .select(
-      "id, user_id, college_email, email_domain, status, id_document_path, reviewed_at, created_at, notes",
+      "id, user_id, college_email, status, id_document_path, reviewed_at, created_at, notes",
     )
     .eq("verification_method", "manual_review")
     .order("created_at", { ascending: false })
@@ -175,7 +174,6 @@ async function VerificationsList({
               <tr>
                 <th className="px-4 py-3 font-medium">Submitted</th>
                 <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Domain</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Doc</th>
                 <th className="px-4 py-3" />
@@ -191,7 +189,6 @@ async function VerificationsList({
                     {new Date(r.created_at).toLocaleString()}
                   </td>
                   <td className="px-4 py-3">{r.college_email}</td>
-                  <td className="px-4 py-3 text-shade-50">{r.email_domain}</td>
                   <td className="px-4 py-3">
                     <StatusPill status={r.status} />
                   </td>

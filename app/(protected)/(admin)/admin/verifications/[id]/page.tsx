@@ -79,7 +79,6 @@ interface DetailRow {
   id: string;
   user_id: string;
   college_email: string;
-  email_domain: string;
   status: "pending" | "verified" | "rejected";
   id_document_path: string | null;
   reviewed_by: string | null;
@@ -93,7 +92,6 @@ interface DetailRow {
     full_name: string | null;
     college_name: string | null;
     college_email: string | null;
-    college_domain: string | null;
     verification_status: string;
   } | null;
 }
@@ -131,7 +129,7 @@ async function VerificationDetailContent({
   const { data: verification, error: vErr } = await supabase
     .from("college_verifications")
     .select(
-      `id, user_id, college_email, email_domain, status,
+      `id, user_id, college_email, status,
        id_document_path, reviewed_by, reviewed_at, review_notes, document_purge_at,
        notes, created_at`,
     )
@@ -148,7 +146,7 @@ async function VerificationDetailContent({
   const { data: profileRow } = await admin
     .from("profiles")
     .select(
-      "id, full_name, college_name, college_email, college_domain, verification_status",
+      "id, full_name, college_name, college_email, verification_status",
     )
     .eq("id", verification.user_id)
     .maybeSingle();
@@ -214,9 +212,7 @@ async function VerificationDetailContent({
               <Field label="Name" value={v.profiles?.full_name ?? "—"} />
               <Field label="Profile email" value={v.profiles?.college_email ?? "—"} />
               <Field label="College (claimed)" value={v.profiles?.college_name ?? "—"} />
-              <Field label="College domain" value={v.profiles?.college_domain ?? "—"} />
               <Field label="Submitted college email" value={v.college_email} />
-              <Field label="Email domain" value={v.email_domain} />
               <Field
                 label="Submitted"
                 value={new Date(v.created_at).toLocaleString()}
