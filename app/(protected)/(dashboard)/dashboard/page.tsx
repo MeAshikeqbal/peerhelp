@@ -65,7 +65,12 @@ async function DashboardContent() {
     redirect("/auth/login");
   }
 
-  const { data: profile } = await getProfileById(supabase, user.id);
+  const { data: profile, error: profileError } = await getProfileById(supabase, user.id);
+
+  if (profileError) {
+    console.error("[DashboardContent]", profileError);
+    throw new Error("Failed to fetch profile");
+  }
 
   if (profile?.verification_status !== "verified") {
     redirect("/student-verification");
