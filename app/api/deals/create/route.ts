@@ -136,6 +136,13 @@ export async function POST(request: Request) {
     });
 
     if (dealError) {
+      // 23505 = unique_violation — the partial index caught a concurrent duplicate insert
+      if (dealError.code === "23505") {
+        return NextResponse.json(
+          { message: "You already have a pending request for this listing" },
+          { status: 400 }
+        );
+      }
       console.error("Deal creation error:", dealError);
       return NextResponse.json(
         { message: "Failed to create deal request" },
