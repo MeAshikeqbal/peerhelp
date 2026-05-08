@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { StatusPill } from "../_components/StatusPill";
+import { StatusPill } from "../../../../../components/admin/StatusPill";
 
 type Status = "pending" | "verified" | "rejected" | "all";
 

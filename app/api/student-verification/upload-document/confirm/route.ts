@@ -116,10 +116,12 @@ export async function POST(request: Request) {
       await admin.storage.from(BUCKET).remove([existing.id_document_path]);
     }
 
-    // Update the verification row.
+    // Update the verification row. Reset document_purge_at so the freshly
+    // uploaded document doesn't inherit a purge timer set by an earlier
+    // requested_changes decision.
     const { error: updateError } = await supabase
       .from("college_verifications")
-      .update({ id_document_path: path })
+      .update({ id_document_path: path, document_purge_at: null })
       .eq("id", verificationId)
       .eq("user_id", user.id);
 

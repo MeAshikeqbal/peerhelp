@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DecisionPanel } from "./DecisionPanel";
-import { StatusPill } from "../../_components/StatusPill";
+import { StatusPill } from "../../../../../../components/admin/StatusPill";
 
 const BUCKET = "verification-documents";
 const SIGNED_URL_TTL = 60 * 5;
@@ -47,20 +47,35 @@ export default async function AdminVerificationDetail({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: verification } = await supabase
+  // NB: college_verifications.user_id FKs auth.users (not public.profiles), so
+  // PostgREST cannot embed `profiles` directly. Fetch in two steps instead.
+  const { data: verification, error: vErr } = await supabase
     .from("college_verifications")
     .select(
       `id, user_id, college_email, email_domain, status,
        id_document_path, reviewed_by, reviewed_at, review_notes, document_purge_at,
-       notes, created_at,
-       profiles ( id, full_name, college_name, college_email, college_domain, verification_status )`,
+       notes, created_at`,
     )
     .eq("id", id)
     .maybeSingle();
 
+  if (vErr) {
+    console.error("[admin/verifications/[id]] load failed", vErr);
+  }
   if (!verification) notFound();
 
-  const v = verification as unknown as DetailRow;
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select(
+      "id, full_name, college_name, college_email, college_domain, verification_status",
+    )
+    .eq("id", verification.user_id)
+    .maybeSingle();
+
+  const v = {
+    ...verification,
+    profiles: profileRow ?? null,
+  } as unknown as DetailRow;
 
   const { data: auditData } = await supabase
     .from("verification_audit_log")

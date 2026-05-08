@@ -6,8 +6,6 @@ import { isAdmin } from "@/utils/query/admin";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sendNotificationEmail } from "@/lib/email/send-notification-email";
 
-const BUCKET = "verification-documents";
-
 type Decision = "approved" | "rejected" | "requested_changes";
 
 const META: Record<
@@ -85,18 +83,12 @@ export async function decide(
   );
   if (!rl.allowed) return rateLimitResponse(rl);
 
-  // Capture the document path before the RPC mutates the row, so we can
-  // delete the storage object after a successful 'requested_changes'.
+  // Document retention is now centralised:
+  //   * the RPC sets document_purge_at per-decision
+  //   * the cron at /api/admin/cron/purge-documents is the sole deleter
+  // We deliberately do NOT remove storage objects synchronously here, so
+  // admins/users have an audit and appeal window before the document is gone.
   const admin = createAdminClient();
-  let previousPath: string | null = null;
-  if (decision === "requested_changes") {
-    const { data: row } = await admin
-      .from("college_verifications")
-      .select("id_document_path")
-      .eq("id", verificationId)
-      .maybeSingle();
-    previousPath = row?.id_document_path ?? null;
-  }
 
   // Build the in-app notification body once and pass to both the RPC and the
   // email so users see identical copy across channels.
@@ -135,17 +127,6 @@ export async function decide(
       { message: result?.message ?? "Decision failed", code: result?.code },
       { status: 400 },
     );
-  }
-
-  // Best-effort: remove the storage object after requested_changes so the
-  // file does not linger past the cron's retention window.
-  if (decision === "requested_changes" && previousPath) {
-    const { error: removeError } = await admin.storage
-      .from(BUCKET)
-      .remove([previousPath]);
-    if (removeError) {
-      console.error("decide: storage remove failed", removeError);
-    }
   }
 
   // Send email (best-effort).
