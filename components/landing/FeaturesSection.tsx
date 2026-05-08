@@ -66,7 +66,7 @@ export function FeaturesSection() {
   const isInView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section className="mb-10 sm:mb-16">
+    <section ref={ref} className="mb-10 sm:mb-16">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -86,10 +86,7 @@ export function FeaturesSection() {
         </div>
       </motion.div>
 
-      <div
-        ref={ref}
-        className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-      >
+      <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <motion.div
           variants={cardVariants}
           initial="hidden"
