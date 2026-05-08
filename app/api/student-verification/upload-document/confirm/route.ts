@@ -118,10 +118,18 @@ export async function POST(request: Request) {
 
     // Update the verification row. Reset document_purge_at so the freshly
     // uploaded document doesn't inherit a purge timer set by an earlier
-    // requested_changes decision.
+    // requested_changes decision. Also clear the previous reviewer note /
+    // reviewed_at so the user no longer sees stale feedback once they have
+    // re-submitted (the next reviewer will write their own).
     const { error: updateError } = await supabase
       .from("college_verifications")
-      .update({ id_document_path: path, document_purge_at: null })
+      .update({
+        id_document_path: path,
+        document_purge_at: null,
+        review_notes: null,
+        reviewed_at: null,
+        reviewed_by: null,
+      })
       .eq("id", verificationId)
       .eq("user_id", user.id);
 
