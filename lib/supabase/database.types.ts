@@ -292,6 +292,8 @@ export type Database = {
           email_deal_declined: boolean
           email_deal_requested: boolean
           email_rating_received: boolean
+          email_tutor_request_received: boolean
+          email_tutor_request_responded: boolean
           updated_at: string
           user_id: string
         }
@@ -302,6 +304,8 @@ export type Database = {
           email_deal_declined?: boolean
           email_deal_requested?: boolean
           email_rating_received?: boolean
+          email_tutor_request_received?: boolean
+          email_tutor_request_responded?: boolean
           updated_at?: string
           user_id: string
         }
@@ -312,6 +316,8 @@ export type Database = {
           email_deal_declined?: boolean
           email_deal_requested?: boolean
           email_rating_received?: boolean
+          email_tutor_request_received?: boolean
+          email_tutor_request_responded?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -502,6 +508,107 @@ export type Database = {
         }
         Relationships: []
       }
+      tutor_profiles: {
+        Row: {
+          availability: string | null
+          bio: string | null
+          created_at: string
+          experience: string | null
+          headline: string
+          hourly_rate: number
+          id: string
+          image_url: string | null
+          languages: string[] | null
+          mode: string
+          status: string
+          subjects: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          experience?: string | null
+          headline: string
+          hourly_rate: number
+          id?: string
+          image_url?: string | null
+          languages?: string[] | null
+          mode: string
+          status?: string
+          subjects: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability?: string | null
+          bio?: string | null
+          created_at?: string
+          experience?: string | null
+          headline?: string
+          hourly_rate?: number
+          id?: string
+          image_url?: string | null
+          languages?: string[] | null
+          mode?: string
+          status?: string
+          subjects?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tutor_session_requests: {
+        Row: {
+          created_at: string
+          id: string
+          learner_user_id: string
+          message: string | null
+          mode: string
+          proposed_when: string | null
+          responded_at: string | null
+          status: string
+          subject: string
+          tutor_profile_id: string
+          tutor_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          learner_user_id: string
+          message?: string | null
+          mode: string
+          proposed_when?: string | null
+          responded_at?: string | null
+          status?: string
+          subject: string
+          tutor_profile_id: string
+          tutor_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          learner_user_id?: string
+          message?: string | null
+          mode?: string
+          proposed_when?: string | null
+          responded_at?: string | null
+          status?: string
+          subject?: string
+          tutor_profile_id?: string
+          tutor_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_session_requests_tutor_profile_id_fkey"
+            columns: ["tutor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       verification_audit_log: {
         Row: {
           action: Database["public"]["Enums"]["verification_audit_action"]
@@ -593,6 +700,8 @@ export type Database = {
           email_deal_declined: boolean
           email_deal_requested: boolean
           email_rating_received: boolean
+          email_tutor_request_received: boolean
+          email_tutor_request_responded: boolean
           updated_at: string
           user_id: string
         }

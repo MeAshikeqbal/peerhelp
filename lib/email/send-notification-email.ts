@@ -14,7 +14,9 @@ export type NotificationEmailType =
   | "rating_received"
   | "verification_approved"
   | "verification_rejected"
-  | "verification_changes_requested";
+  | "verification_changes_requested"
+  | "tutor_request_received"
+  | "tutor_request_responded";
 
 const EVENT_META: Record<
   NotificationEmailType,
@@ -65,6 +67,16 @@ const EVENT_META: Record<
     subject: "Action needed on your PeerHelp verification",
     cta: "Update verification",
     ctaHref: () => `${appUrl}/student-verification/pending-review`,
+  },
+  tutor_request_received: {
+    subject: "New tutor session request",
+    cta: "Review request",
+    ctaHref: () => `${appUrl}/dashboard/tutoring/requests`,
+  },
+  tutor_request_responded: {
+    subject: "Update on your tutor request",
+    cta: "View status",
+    ctaHref: () => `${appUrl}/dashboard/tutoring/learning`,
   },
 };
 

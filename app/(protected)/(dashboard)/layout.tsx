@@ -9,16 +9,30 @@ async function NavWithPending() {
   } = await supabase.auth.getUser();
 
   let pendingDealsCount = 0;
+  let pendingTutorRequestsCount = 0;
   if (user) {
-    const { count } = await supabase
-      .from("deals")
-      .select("id", { count: "exact", head: true })
-      .eq("seller_id", user.id)
-      .eq("status", "pending");
-    pendingDealsCount = count ?? 0;
+    const [dealsRes, tutorReqRes] = await Promise.all([
+      supabase
+        .from("deals")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", user.id)
+        .eq("status", "pending"),
+      supabase
+        .from("tutor_session_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("tutor_user_id", user.id)
+        .eq("status", "pending"),
+    ]);
+    pendingDealsCount = dealsRes.count ?? 0;
+    pendingTutorRequestsCount = tutorReqRes.count ?? 0;
   }
 
-  return <AppNav pendingDealsCount={pendingDealsCount} />;
+  return (
+    <AppNav
+      pendingDealsCount={pendingDealsCount}
+      pendingTutorRequestsCount={pendingTutorRequestsCount}
+    />
+  );
 }
 
 export default function DashboardLayout({

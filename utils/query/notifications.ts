@@ -20,6 +20,8 @@ export interface NotificationPreferences {
   email_deal_cancelled: boolean;
   email_deal_completed: boolean;
   email_rating_received: boolean;
+  email_tutor_request_received: boolean;
+  email_tutor_request_responded: boolean;
   updated_at: string;
 }
 
