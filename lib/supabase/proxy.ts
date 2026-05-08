@@ -72,9 +72,22 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const userId = user.sub;
     const isProtectedPath = pathname.startsWith("/dashboard");
+    const isAdminPath = pathname.startsWith("/admin");
     const isVerificationPath =
       pathname.startsWith("/student-verification") ||
       pathname.includes("/(verification)");
+
+    // /admin requires membership in admin_users (regardless of verification state).
+    if (isAdminPath) {
+      const { data: isAdmin } = await supabase.rpc("is_admin");
+      if (!isAdmin) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
+      // Admins skip the verification redirects below.
+      return supabaseResponse;
+    }
 
     const { data: profile } = await supabase
       .from("profiles")

@@ -79,15 +79,16 @@ export async function getNotificationPrefs(
 export async function upsertNotificationPrefs(
   supabase: DB,
   prefs: Partial<Omit<NotificationPreferences, "user_id" | "updated_at">>
-): Promise<void> {
+): Promise<{ error: unknown | null }> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) return { error: new Error("Not authenticated") };
 
   const { error } = await supabase
     .from("notification_preferences")
     .upsert({ user_id: user.id, ...prefs, updated_at: new Date().toISOString() });
 
   if (error) console.error("[upsertNotificationPrefs]", error);
+  return { error };
 }

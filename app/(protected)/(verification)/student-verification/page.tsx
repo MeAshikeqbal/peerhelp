@@ -1,5 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/utils/query/auth";
 import ClientForm from "./ClientForm";
 
 function getMessage(searchParams: Record<string, string | string[] | undefined>) {
@@ -23,6 +26,25 @@ async function StudentVerificationContent({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const supabase = await createClient();
+  const { user } = await getCurrentUser(supabase);
+  if (!user) redirect("/auth/login");
+
+  // If the user has already entered the manual-review track (in any state),
+  // do not let them re-fill the form. Send them to the pending-review page
+  // where they can monitor status or re-upload after a rejection.
+  const { data: existingManual } = await supabase
+    .from("college_verifications")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("verification_method", "manual_review")
+    .limit(1)
+    .maybeSingle();
+
+  if (existingManual) {
+    redirect("/student-verification/pending-review");
+  }
+
   const params = await searchParams;
   const message = getMessage(params);
 

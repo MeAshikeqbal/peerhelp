@@ -11,7 +11,10 @@ export type NotificationEmailType =
   | "deal_declined"
   | "deal_cancelled"
   | "deal_completed"
-  | "rating_received";
+  | "rating_received"
+  | "verification_approved"
+  | "verification_rejected"
+  | "verification_changes_requested";
 
 const EVENT_META: Record<
   NotificationEmailType,
@@ -47,6 +50,21 @@ const EVENT_META: Record<
     subject: "You received a new rating",
     cta: "View your profile",
     ctaHref: () => `${appUrl}/dashboard/profile`,
+  },
+  verification_approved: {
+    subject: "Your PeerHelp verification was approved",
+    cta: "Open dashboard",
+    ctaHref: () => `${appUrl}/dashboard`,
+  },
+  verification_rejected: {
+    subject: "Your PeerHelp verification was not approved",
+    cta: "Restart verification",
+    ctaHref: () => `${appUrl}/student-verification`,
+  },
+  verification_changes_requested: {
+    subject: "Action needed on your PeerHelp verification",
+    cta: "Update verification",
+    ctaHref: () => `${appUrl}/student-verification/pending-review`,
   },
 };
 
