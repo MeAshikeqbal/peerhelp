@@ -7,6 +7,7 @@ import { Menu, LogOut, UserCircle2, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/nav/NotificationBell";
 import {
   Sheet,
   SheetContent,
@@ -99,6 +100,7 @@ export function AppNav({ pendingDealsCount = 0 }: { pendingDealsCount?: number }
           {/* Desktop avatar menu */}
           <div className="hidden md:flex items-center gap-1">
             <ThemeToggle />
+            <NotificationBell />
             {user && (
               <div ref={avatarRef} className="relative">
                 <button
@@ -145,6 +147,7 @@ export function AppNav({ pendingDealsCount = 0 }: { pendingDealsCount?: number }
           {/* Mobile hamburger */}
           <div className="md:hidden flex items-center gap-1">
             <ThemeToggle />
+            <NotificationBell />
             <Sheet>
               <SheetTrigger asChild>
                 <button
