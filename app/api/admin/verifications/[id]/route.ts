@@ -40,11 +40,16 @@ export async function GET(
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }
 
-  const { data: auditLog } = await supabase
+  const { data: auditLog, error: auditError } = await supabase
     .from("verification_audit_log")
     .select("id, actor_user_id, action, reason, created_at")
     .eq("verification_id", id)
     .order("created_at", { ascending: false });
+
+  if (auditError) {
+    console.error("admin audit log error:", auditError);
+    return NextResponse.json({ message: "Failed to load audit log" }, { status: 500 });
+  }
 
   // Generate a short-lived signed URL for the ID document, if present.
   let documentUrl: string | null = null;
@@ -58,7 +63,7 @@ export async function GET(
 
   return NextResponse.json({
     verification,
-    auditLog: auditLog ?? [],
+    auditLog: auditLog,
     documentUrl,
   });
 }

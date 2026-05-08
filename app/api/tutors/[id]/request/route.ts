@@ -144,21 +144,19 @@ export async function POST(
       );
     }
 
-    // Notify tutor (non-blocking)
-    try {
-      const tutorEmail = await getUserEmail(supabase, tutor.user_id);
-      if (tutorEmail) {
-        await notifyUser(supabase, {
+    // Notify tutor (fire-and-forget; does not block the response)
+    void getUserEmail(supabase, tutor.user_id)
+      .then((tutorEmail) => {
+        if (!tutorEmail) return;
+        return notifyUser(supabase, {
           recipientId: tutor.user_id,
           recipientEmail: tutorEmail,
           type: "tutor_request_received",
           title: "New tutor session request",
           body: `You have a new tutoring request for "${subjectTrim}". Review it and accept or decline.`,
         });
-      }
-    } catch (notifErr) {
-      console.error("notify tutor error (non-fatal):", notifErr);
-    }
+      })
+      .catch((err) => console.error("notify tutor error (non-fatal):", err));
 
     return NextResponse.json({ request: req }, { status: 201 });
   } catch (err) {

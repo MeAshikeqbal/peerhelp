@@ -24,7 +24,7 @@ export default async function PendingReviewPage() {
   }
 
   // Fetch the latest manual_review verification row.
-  const { data: verification } = await supabase
+  const { data: verification, error: verError } = await supabase
     .from("college_verifications")
     .select(
       "id, status, id_document_path, review_notes, reviewed_at, verification_method, created_at",
@@ -34,6 +34,8 @@ export default async function PendingReviewPage() {
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  if (verError) throw verError;
 
   const maskedEmail = profile?.college_email
     ? profile.college_email.replace(/(.{2})(.*)(@.*)/, "$1***$3")

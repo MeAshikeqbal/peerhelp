@@ -48,11 +48,12 @@ async function AdminHomeContent() {
   const supabase = await createClient();
 
   async function count(status: "pending" | "verified" | "rejected") {
-    const { count } = await supabase
+    const { count, error } = await supabase
       .from("college_verifications")
       .select("id", { count: "exact", head: true })
       .eq("verification_method", "manual_review")
       .eq("status", status);
+    if (error) throw new Error(`[AdminHome] count(${status}) failed: ${error.message}`);
     return count ?? 0;
   }
 

@@ -121,7 +121,7 @@ async function TutorContent({ params }: { params: Promise<{ id: string }> }) {
               Subjects
             </h2>
             <div className="flex flex-wrap gap-2">
-              {tutor.subjects.map((s) => (
+              {(tutor.subjects ?? []).map((s) => (
                 <span
                   key={s}
                   className="inline-flex items-center rounded-full border border-border bg-overlay/[0.03] px-3 py-1 text-xs text-shade-30"
@@ -160,7 +160,7 @@ async function TutorContent({ params }: { params: Promise<{ id: string }> }) {
                 Languages
               </h2>
               <div className="flex flex-wrap gap-2">
-                {tutor.languages.map((l) => (
+                {(tutor.languages ?? []).map((l) => (
                   <span
                     key={l}
                     className="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs text-shade-30"
@@ -208,7 +208,7 @@ async function TutorContent({ params }: { params: Promise<{ id: string }> }) {
               isLoggedIn={isLoggedIn}
               isVerified={isVerified}
               isSelf={isSelf}
-              defaultSubjects={tutor.subjects}
+              defaultSubjects={tutor.subjects ?? []}
             />
           </div>
         </aside>

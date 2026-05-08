@@ -48,7 +48,7 @@ async function TutorsContent({
     q: sp.q,
     subject: sp.subject,
     mode: sp.mode,
-    page: parseInt(sp.page || "1", 10) || 1,
+    page: Math.max(1, parseInt(sp.page || "1", 10) || 1),
     pageSize: 12,
   };
   const supabase = await createClient();

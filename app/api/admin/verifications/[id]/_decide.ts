@@ -72,6 +72,9 @@ export async function decide(
   if (meta.requireReason && !reason) {
     return NextResponse.json({ message: "reason is required" }, { status: 400 });
   }
+  if (reason && reason.length > 2000) {
+    return NextResponse.json({ message: "reason must be 2000 characters or fewer" }, { status: 400 });
+  }
 
   // Rate limit: 60 admin decisions per hour per actor
   const rl = await checkRateLimit(
@@ -88,7 +91,6 @@ export async function decide(
   //   * the cron at /api/admin/cron/purge-documents is the sole deleter
   // We deliberately do NOT remove storage objects synchronously here, so
   // admins/users have an audit and appeal window before the document is gone.
-  const admin = createAdminClient();
 
   // Build the in-app notification body once and pass to both the RPC and the
   // email so users see identical copy across channels.
@@ -131,6 +133,7 @@ export async function decide(
 
   // Send email (best-effort).
   if (result.user_id) {
+    const admin = createAdminClient();
     try {
       const { data: targetUser } = await admin.auth.admin.getUserById(
         result.user_id,

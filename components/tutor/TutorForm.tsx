@@ -133,8 +133,12 @@ export function TutorForm({ mode, initial }: Props) {
       };
       if (mode === "edit") payload.status = status;
 
+      if (mode === "edit" && !initial?.id) {
+        setError("Missing tutor profile ID");
+        return;
+      }
       const url =
-        mode === "create" ? "/api/tutors/create" : `/api/tutors/${initial?.id}`;
+        mode === "create" ? "/api/tutors/create" : `/api/tutors/${initial!.id}`;
       const method = mode === "create" ? "POST" : "PATCH";
 
       const res = await fetch(url, {

@@ -80,7 +80,7 @@ export default async function TutoringHomePage() {
                   {tutor.headline}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  ₹{tutor.hourly_rate.toLocaleString()} / hour ·{" "}
+                  ₹{tutor.hourly_rate.toLocaleString("en-IN")} / hour ·{" "}
                   {tutor.subjects.slice(0, 4).join(", ")}
                   {tutor.subjects.length > 4
                     ? ` +${tutor.subjects.length - 4}`

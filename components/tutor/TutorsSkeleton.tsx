@@ -8,7 +8,7 @@ export function TutorsSkeleton() {
           <div className="aspect-[16/9] w-full bg-overlay/[0.04]" />
           <CardHeader className="pb-3">
             <CardTitle>
-              <div className="h-5 w-3/4 rounded bg-overlay/[0.06]" />
+              <span className="block h-5 w-3/4 rounded bg-overlay/[0.06]" />
             </CardTitle>
             <div className="h-3 w-24 rounded bg-overlay/[0.04] mt-2" />
           </CardHeader>

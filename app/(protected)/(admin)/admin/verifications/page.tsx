@@ -29,7 +29,9 @@ export default async function AdminVerificationsPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const sp = await searchParams;
-  const status = (sp.status as Status) ?? "pending";
+  const VALID_STATUSES: Status[] = ["pending", "verified", "rejected", "all"];
+  const rawStatus = sp.status as Status | undefined;
+  const status: Status = rawStatus && VALID_STATUSES.includes(rawStatus) ? rawStatus : "pending";
 
   const supabase = await createClient();
   let query = supabase

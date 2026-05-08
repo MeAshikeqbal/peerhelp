@@ -26,7 +26,7 @@ export function TutorsFilters({ subject, mode, baseUrl = "/tutors" }: Props) {
     if (value) params.set(key, value);
     else params.delete(key);
     params.delete("page");
-    router.push(`${pathname}?${params.toString()}`);
+    router.replace(`${pathname}?${params.toString()}`);
   }
 
   const hasFilters = subject || mode;

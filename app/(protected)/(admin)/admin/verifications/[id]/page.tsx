@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DecisionPanel } from "./DecisionPanel";
-import { StatusPill } from "../../../../../../components/admin/StatusPill";
+import { StatusPill } from "@/components/admin/StatusPill";
 
 const BUCKET = "verification-documents";
 const SIGNED_URL_TTL = 60 * 5;
@@ -64,7 +64,9 @@ export default async function AdminVerificationDetail({
   }
   if (!verification) notFound();
 
-  const { data: profileRow } = await supabase
+  const admin = createAdminClient();
+
+  const { data: profileRow } = await admin
     .from("profiles")
     .select(
       "id, full_name, college_name, college_email, college_domain, verification_status",
@@ -77,7 +79,7 @@ export default async function AdminVerificationDetail({
     profiles: profileRow ?? null,
   } as unknown as DetailRow;
 
-  const { data: auditData } = await supabase
+  const { data: auditData } = await admin
     .from("verification_audit_log")
     .select("id, actor_user_id, action, reason, created_at")
     .eq("verification_id", id)
@@ -87,7 +89,6 @@ export default async function AdminVerificationDetail({
   let documentUrl: string | null = null;
   let documentMime: string | null = null;
   if (v.id_document_path) {
-    const admin = createAdminClient();
     const { data: signed } = await admin.storage
       .from(BUCKET)
       .createSignedUrl(v.id_document_path, SIGNED_URL_TTL);

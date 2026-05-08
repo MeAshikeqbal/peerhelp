@@ -16,7 +16,7 @@ export default async function CreateTutorPage() {
   }
 
   const { data: existing } = await getOwnTutorProfile(supabase, user.id);
-  if (existing && existing.status === "active") {
+  if (existing) {
     redirect("/dashboard/tutoring");
   }
 

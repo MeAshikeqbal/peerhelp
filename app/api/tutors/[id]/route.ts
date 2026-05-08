@@ -36,7 +36,7 @@ function cleanList(
     if (seen.has(k)) continue;
     seen.add(k);
     out.push(t);
-    if (out.length > max) break;
+    if (out.length >= max) break;
   }
   if (out.length < min)
     return { ok: false, message: `Provide ${min}–${max} entries` };

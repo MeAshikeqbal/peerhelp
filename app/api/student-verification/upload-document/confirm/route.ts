@@ -121,7 +121,7 @@ export async function POST(request: Request) {
     // requested_changes decision. Also clear the previous reviewer note /
     // reviewed_at so the user no longer sees stale feedback once they have
     // re-submitted (the next reviewer will write their own).
-    const { error: updateError } = await supabase
+    const { data: updatedRows, error: updateError } = await supabase
       .from("college_verifications")
       .update({
         id_document_path: path,
@@ -131,11 +131,15 @@ export async function POST(request: Request) {
         reviewed_by: null,
       })
       .eq("id", verificationId)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .select("id");
 
     if (updateError) {
       console.error("confirm: update verification failed", updateError);
       return NextResponse.json({ message: "Failed to record upload" }, { status: 500 });
+    }
+    if (!updatedRows || updatedRows.length === 0) {
+      return NextResponse.json({ message: "Verification not found" }, { status: 404 });
     }
 
     // Audit log

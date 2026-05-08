@@ -42,7 +42,7 @@ function sanitizeStringList(
     if (seen.has(key)) continue;
     seen.add(key);
     cleaned.push(trimmed);
-    if (cleaned.length > max) break;
+    if (cleaned.length >= max) break;
   }
   if (cleaned.length < min) {
     return {

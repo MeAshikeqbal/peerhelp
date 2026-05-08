@@ -79,6 +79,7 @@ export function DecisionPanel({
         onChange={(e) => setReason(e.target.value)}
         placeholder="Reason / note to the student"
         rows={3}
+        maxLength={2000}
         disabled={disabled}
         className="w-full resize-y rounded-lg border border-overlay/15 bg-void/60 p-3 text-sm text-foreground placeholder:text-shade-50 focus:border-neon-green/50 focus:outline-none"
       />

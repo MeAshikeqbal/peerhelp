@@ -14,8 +14,12 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const status = searchParams.get("status") ?? "pending";
-  const method = searchParams.get("method") ?? "manual_review";
+  const VALID_STATUSES = ["pending", "verified", "rejected", "all"] as const;
+  const VALID_METHODS = ["manual_review", "college_email"] as const;
+  const rawStatus = searchParams.get("status") ?? "pending";
+  const rawMethod = searchParams.get("method") ?? "manual_review";
+  const status = (VALID_STATUSES as readonly string[]).includes(rawStatus) ? rawStatus : "pending";
+  const method = (VALID_METHODS as readonly string[]).includes(rawMethod) ? rawMethod : "manual_review";
 
   let query = supabase
     .from("college_verifications")
@@ -27,7 +31,7 @@ export async function GET(request: Request) {
     )
     .eq("verification_method", method)
     .order("created_at", { ascending: false })
-    .limit(100);
+    .limit(200);
 
   if (status !== "all") {
     query = query.eq("status", status as "pending" | "verified" | "rejected");

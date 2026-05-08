@@ -40,13 +40,15 @@ export default async function LearningPage() {
     redirect("/student-verification");
   }
 
-  const { data: requests } = await getOutgoingRequests(supabase, user.id);
+  const { data: requests, error: reqError } = await getOutgoingRequests(supabase, user.id);
+  if (reqError) throw reqError;
   const list = requests ?? [];
 
   const tutorIds = Array.from(new Set(list.map((r) => r.tutor_user_id)));
   const profileMap = new Map<string, string>();
   if (tutorIds.length > 0) {
-    const { data: profiles } = await getProfilesByIds(supabase, tutorIds);
+    const { data: profiles, error: profError } = await getProfilesByIds(supabase, tutorIds);
+    if (profError) console.error("[LearningPage] getProfilesByIds failed", profError);
     for (const p of profiles ?? []) {
       if (p.full_name) profileMap.set(p.id, p.full_name);
     }

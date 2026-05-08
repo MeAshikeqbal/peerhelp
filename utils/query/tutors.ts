@@ -170,11 +170,14 @@ export async function updateRequestStatus(
   supabase: DB,
   id: string,
   status: TutorRequestStatus,
+  currentStatus?: TutorRequestStatus,
 ) {
-  return supabase
+  let q = supabase
     .from("tutor_session_requests")
     .update({ status, responded_at: new Date().toISOString() })
-    .eq("id", id)
-    .select()
-    .single();
+    .eq("id", id);
+  if (currentStatus !== undefined) {
+    q = q.eq("status", currentStatus) as typeof q;
+  }
+  return q.select().maybeSingle();
 }

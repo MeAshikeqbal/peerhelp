@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const BUCKET = "verification-documents";
@@ -18,7 +19,11 @@ export async function POST(request: Request) {
     );
   }
   const auth = request.headers.get("authorization") ?? "";
-  if (auth !== `Bearer ${expected}`) {
+  const expected_bearer = `Bearer ${expected}`;
+  const authMatch =
+    auth.length === expected_bearer.length &&
+    crypto.timingSafeEqual(Buffer.from(auth), Buffer.from(expected_bearer));
+  if (!authMatch) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
@@ -60,12 +65,15 @@ export async function POST(request: Request) {
       continue;
     }
 
-    await admin.from("verification_audit_log").insert({
+    const { error: auditError } = await admin.from("verification_audit_log").insert({
       verification_id: row.id,
       actor_user_id: null,
       action: "document_purged",
       reason: "Auto-purge after retention window",
     });
+    if (auditError) {
+      console.error(`purge audit insert failed for ${row.id}:`, auditError);
+    }
 
     purged += 1;
   }

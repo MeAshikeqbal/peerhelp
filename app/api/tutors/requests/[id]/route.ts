@@ -74,12 +74,19 @@ export async function PATCH(
       );
     }
 
-    const { data, error } = await updateRequestStatus(supabase, id, next);
+    const { data, error } = await updateRequestStatus(supabase, id, next, existing.status as TutorRequestStatus);
     if (error) {
       console.error("request status update error:", error);
       return NextResponse.json(
         { message: "Failed to update request" },
         { status: 500 },
+      );
+    }
+    if (!data) {
+      // Another request changed the status concurrently.
+      return NextResponse.json(
+        { message: "Request status changed — please refresh and try again" },
+        { status: 409 },
       );
     }
 
