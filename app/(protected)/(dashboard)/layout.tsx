@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { AppNav } from "@/components/nav/AppNav";
 import { createClient } from "@/lib/supabase/server";
+import { getUnreadMessagesCount } from "@/utils/query/messages";
 
 async function NavWithPending() {
   const supabase = await createClient();
@@ -10,8 +11,9 @@ async function NavWithPending() {
 
   let pendingDealsCount = 0;
   let pendingTutorRequestsCount = 0;
+  let unreadMessagesCount = 0;
   if (user) {
-    const [dealsRes, tutorReqRes] = await Promise.all([
+    const [dealsRes, tutorReqRes, unread] = await Promise.all([
       supabase
         .from("deals")
         .select("id", { count: "exact", head: true })
@@ -22,15 +24,18 @@ async function NavWithPending() {
         .select("id", { count: "exact", head: true })
         .eq("tutor_user_id", user.id)
         .eq("status", "pending"),
+      getUnreadMessagesCount(supabase),
     ]);
     pendingDealsCount = dealsRes.count ?? 0;
     pendingTutorRequestsCount = tutorReqRes.count ?? 0;
+    unreadMessagesCount = unread;
   }
 
   return (
     <AppNav
       pendingDealsCount={pendingDealsCount}
       pendingTutorRequestsCount={pendingTutorRequestsCount}
+      unreadMessagesCount={unreadMessagesCount}
     />
   );
 }

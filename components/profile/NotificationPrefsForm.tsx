@@ -47,6 +47,11 @@ const PREFS: { key: PrefKey; label: string; description: string }[] = [
     label: "Tutor request response",
     description: "When your tutor request is accepted, declined, or completed",
   },
+  {
+    key: "email_message_received",
+    label: "New messages",
+    description: "When someone sends you a message (cooled down to one email per 5 min)",
+  },
 ];
 
 interface NotificationPrefsFormProps {
@@ -65,6 +70,7 @@ export function NotificationPrefsForm({ initialPrefs }: NotificationPrefsFormPro
       initialPrefs?.email_tutor_request_received ?? true,
     email_tutor_request_responded:
       initialPrefs?.email_tutor_request_responded ?? true,
+    email_message_received: initialPrefs?.email_message_received ?? true,
   });
   const [saving, setSaving] = useState<PrefKey | null>(null);
 

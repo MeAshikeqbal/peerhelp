@@ -4,13 +4,14 @@ import Link from "next/link";
 import {
   ShieldCheck, Clock, ShieldAlert,
   BookOpen, Handshake, GraduationCap,
-  Mail, Building2, KeyRound, ChevronRight, Phone, Bell,
+  Mail, Building2, KeyRound, ChevronRight, Phone, Bell, Ban,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { PhoneForm } from "@/components/profile/PhoneForm";
 import { ReverifyButton } from "@/components/profile/ReverifyButton";
 import { NotificationPrefsForm } from "@/components/profile/NotificationPrefsForm";
+import { BlockedUsersList } from "@/components/profile/BlockedUsersList";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getProfileById, getOwnPhone } from "@/utils/query/profiles";
 import { countUserListings } from "@/utils/query/listings";
@@ -197,6 +198,15 @@ export default async function ProfilePage() {
                 <h2 className="text-xs font-medium text-shade-50 uppercase tracking-widest">Email Notifications</h2>
               </div>
               <NotificationPrefsForm initialPrefs={notifPrefs} />
+            </section>
+
+            {/* Blocked users */}
+            <section className="rounded-2xl border border-overlay/[0.07] bg-forest overflow-hidden">
+              <div className="flex items-center gap-2 px-6 pt-5 pb-2">
+                <Ban size={12} className="text-shade-50" />
+                <h2 className="text-xs font-medium text-shade-50 uppercase tracking-widest">Blocked users</h2>
+              </div>
+              <BlockedUsersList />
             </section>
           </div>
 

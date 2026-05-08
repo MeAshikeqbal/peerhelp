@@ -31,10 +31,12 @@ function getInitials(email: string) {
 
 export function AdminNav({
   pendingCount = 0,
+  pendingReportsCount = 0,
   isSuperAdmin = false,
   email,
 }: {
   pendingCount?: number;
+  pendingReportsCount?: number;
   isSuperAdmin?: boolean;
   email?: string | null;
 }) {
@@ -79,6 +81,14 @@ export function AdminNav({
         pathname === "/admin/verifications" ||
         (pathname?.startsWith("/admin/verifications/") ?? false),
       badge: pendingCount,
+    },
+    {
+      href: "/admin/reports",
+      label: "Reports",
+      active:
+        pathname === "/admin/reports" ||
+        (pathname?.startsWith("/admin/reports/") ?? false),
+      badge: pendingReportsCount,
     },
   ];
 

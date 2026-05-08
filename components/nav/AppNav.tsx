@@ -28,7 +28,7 @@ function getInitials(email: string) {
   return local.slice(0, 2).toUpperCase();
 }
 
-export function AppNav({ pendingDealsCount = 0, pendingTutorRequestsCount = 0 }: { pendingDealsCount?: number; pendingTutorRequestsCount?: number }) {
+export function AppNav({ pendingDealsCount = 0, pendingTutorRequestsCount = 0, unreadMessagesCount = 0 }: { pendingDealsCount?: number; pendingTutorRequestsCount?: number; unreadMessagesCount?: number }) {
   const [user, setUser] = useState<NavUser | null>(null);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
@@ -60,6 +60,7 @@ export function AppNav({ pendingDealsCount = 0, pendingTutorRequestsCount = 0 }:
     { href: "/dashboard/my-listings", label: "My Listings", active: pathname === "/dashboard/my-listings", badge: 0 },
     { href: "/dashboard/deals", label: "Deals", active: pathname === "/dashboard/deals", badge: pendingDealsCount },
     { href: "/dashboard/tutoring", label: "Tutoring", active: pathname?.startsWith("/dashboard/tutoring") ?? false, badge: pendingTutorRequestsCount },
+    { href: "/dashboard/messages", label: "Messages", active: pathname?.startsWith("/dashboard/messages") ?? false, badge: unreadMessagesCount },
   ];
 
   const handleLogout = async () => {

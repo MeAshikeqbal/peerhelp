@@ -16,11 +16,15 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   if (!user) redirect("/auth/login");
   if (!(await isAdmin(supabase))) redirect("/dashboard");
 
-  const [{ count }, superAdmin] = await Promise.all([
+  const [{ count }, { count: reportsCount }, superAdmin] = await Promise.all([
     supabase
       .from("college_verifications")
       .select("id", { count: "exact", head: true })
       .eq("verification_method", "manual_review")
+      .eq("status", "pending"),
+    supabase
+      .from("message_reports")
+      .select("id", { count: "exact", head: true })
       .eq("status", "pending"),
     isSuperAdmin(supabase),
   ]);
@@ -29,6 +33,7 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
     <>
       <AdminNav
         pendingCount={count ?? 0}
+        pendingReportsCount={reportsCount ?? 0}
         isSuperAdmin={superAdmin}
         email={user.email ?? null}
       />

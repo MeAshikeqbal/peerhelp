@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/utils/query/auth";
 import { getProfileById, getProfilesByIds } from "@/utils/query/profiles";
 import { getIncomingRequests } from "@/utils/query/tutors";
 import { SessionRequestStatusActions } from "@/components/tutor/SessionRequestStatusActions";
+import { MessageButton } from "@/components/messages/MessageButton";
 
 const STATUS_COLOR: Record<string, string> = {
   pending: "border-yellow-500/30 bg-yellow-500/10 text-yellow-300",
@@ -122,6 +123,11 @@ export default async function TutorRequestsPage() {
                   status={r.status as Status}
                 />
               </div>
+              {(r.status === "accepted" || r.status === "completed") && (
+                <div className="mt-2">
+                  <MessageButton contextType="tutor_request" contextId={r.id} variant="compact" />
+                </div>
+              )}
               {r.message && (
                 <p className="text-sm text-shade-30 whitespace-pre-line border-t border-border pt-3 mt-2">
                   {r.message}

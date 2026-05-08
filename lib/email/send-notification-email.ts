@@ -17,7 +17,8 @@ export type NotificationEmailType =
   | "verification_rejected"
   | "verification_changes_requested"
   | "tutor_request_received"
-  | "tutor_request_responded";
+  | "tutor_request_responded"
+  | "message_received";
 
 const EVENT_META: Record<
   NotificationEmailType,
@@ -78,6 +79,14 @@ const EVENT_META: Record<
     subject: "Update on your tutor request",
     cta: "View status",
     ctaHref: () => `${appUrl}/dashboard/tutoring/learning`,
+  },
+  message_received: {
+    subject: "New message on PeerHelp",
+    cta: "Open conversation",
+    ctaHref: (threadId) =>
+      threadId
+        ? `${appUrl}/dashboard/messages/${threadId}`
+        : `${appUrl}/dashboard/messages`,
   },
 };
 
