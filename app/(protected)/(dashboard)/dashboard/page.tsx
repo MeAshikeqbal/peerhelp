@@ -88,9 +88,9 @@ async function DashboardContent() {
   return (
     <>
       {/* Header */}
-      <div className="mb-8 flex items-start justify-between gap-4">
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-4xl font-bold text-foreground mb-2">
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
             Welcome back, {profile?.full_name || "Student"}!
           </h1>
           {profile?.college_name && (
@@ -153,7 +153,7 @@ async function DashboardContent() {
 
       {/* Tutoring CTA / status */}
       <div className="mb-8 rounded-xl border border-border bg-overlay/[0.02] p-6 transition-colors hover:border-neon-green/30">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-neon-green/10 shrink-0">
               <Sparkles size={18} className="text-neon-green" />
@@ -176,23 +176,23 @@ async function DashboardContent() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col xs:flex-row sm:flex-row gap-2 w-full sm:w-auto shrink-0">
             {hasActiveTutorProfile ? (
               <>
-                <Link href="/dashboard/tutoring/requests">
-                  <Button variant="outline">Incoming requests</Button>
+                <Link href="/dashboard/tutoring/requests" className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto">Incoming requests</Button>
                 </Link>
-                <Link href="/dashboard/tutoring">
-                  <Button>Manage profile</Button>
+                <Link href="/dashboard/tutoring" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto">Manage profile</Button>
                 </Link>
               </>
             ) : tutor ? (
-              <Link href="/dashboard/tutoring/edit">
-                <Button>Edit profile</Button>
+              <Link href="/dashboard/tutoring/edit" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">Edit profile</Button>
               </Link>
             ) : (
-              <Link href="/dashboard/tutoring/create">
-                <Button>
+              <Link href="/dashboard/tutoring/create" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">
                   <Sparkles size={14} className="mr-1.5" /> List yourself
                 </Button>
               </Link>
