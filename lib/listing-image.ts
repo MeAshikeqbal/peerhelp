@@ -15,9 +15,6 @@ export function validateImageUrl(url: string, userId: string): string | null {
   }
   if (parsed.protocol !== "https:") return "Image URL must be HTTPS";
 
-  // Open Library covers (used by ISBN scan flow) — safelist
-  if (parsed.hostname === "covers.openlibrary.org") return null;
-
   const supabaseHost = (() => {
     try {
       return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname;

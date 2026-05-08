@@ -194,8 +194,19 @@ export default function CreateListingForm() {
 
     try {
       if (imageSource === "isbn-cover" && imagePreviewUrl) {
-        // Use the external cover URL directly — no upload needed
-        image_url = imagePreviewUrl;
+        // Upload the external cover to our own storage so we own the URL
+        setIsUploadingImage(true);
+        const uploadRes = await fetch("/api/books/cover-upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ coverUrl: imagePreviewUrl }),
+        });
+        if (!uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          throw new Error(uploadData.message ?? "Failed to upload cover image");
+        }
+        const { storageUrl } = await uploadRes.json();
+        image_url = storageUrl;
       } else if (imageSource === "manual" && imageFile) {
         setIsUploadingImage(true);
         const supabase = createClient();
