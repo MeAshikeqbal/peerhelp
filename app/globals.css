@@ -1,26 +1,124 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  /* ============================================================
+     DARK THEME (default) — original PeerHelp palette unchanged
+     ============================================================ */
+  :root,
+  .dark {
+    /* shadcn semantic tokens */
+    --background: 0 0% 0%;            /* void #000000 */
+    --foreground: 0 0% 100%;          /* white */
+    --card: 190 67% 2%;               /* deep-teal #02090A */
+    --card-foreground: 0 0% 100%;
+    --popover: 190 67% 2%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 190 65% 6%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 190 65% 6%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 154 90% 58%;            /* neon-green #36F4A4 */
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 195 24% 15%;
+    --input: 240 5% 26%;
+    --ring: 154 90% 58%;
+    --radius: 0.5rem;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+    /* Custom palette tokens (DESIGN.md) */
+    --void: 0 0% 0%;                  /* #000000 */
+    --deep-teal: 190 67% 2%;          /* #02090A */
+    --dark-forest: 187 64% 6%;        /* #061A1C */
+    --forest: 168 41% 11%;            /* #102620 */
+    --neon-green: 154 90% 58%;        /* #36F4A4 */
+    --aloe: 141 90% 87%;              /* #C1FBD4 */
+    --pistachio: 138 79% 90%;         /* #D4F9E0 */
+    --shade-30: 240 5% 84%;           /* #D4D4D8 */
+    --shade-50: 240 4% 46%;           /* #71717A */
+    --shade-60: 240 5% 34%;           /* #52525B */
+    --shade-70: 240 5% 26%;           /* #3F3F46 */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Theme-aware overlay base color (used by bg-overlay/<alpha>) */
+    --overlay: 0 0% 100%;             /* white in dark theme */
+    /* Inverse overlay for tint highlights */
+    --overlay-inverse: 0 0% 0%;
+
+    color-scheme: dark;
+  }
+
+  /* ============================================================
+     LIGHT THEME — derived from same palette, inverted surfaces,
+     accent kept identical (neon-green) per design_master.md.
+     ============================================================ */
+  .light {
+    /* shadcn semantic tokens */
+    --background: 60 14% 98%;         /* warm off-white #FAFAF7 */
+    --foreground: 0 0% 6%;            /* near-black #0F0F0F */
+    --card: 0 0% 100%;                /* pure white card */
+    --card-foreground: 0 0% 6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 6%;
+    --primary: 0 0% 9%;               /* near-black */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 9% 95%;           /* #F2F2EE soft warm grey */
+    --secondary-foreground: 0 0% 6%;
+    --muted: 60 9% 94%;
+    --muted-foreground: 240 4% 36%;   /* darker neutral on light */
+    --accent: 154 78% 38%;            /* deeper green for AA contrast on white */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 90%;             /* #E4E4E7 */
+    --input: 240 6% 88%;
+    --ring: 154 78% 38%;
+
+    /* Custom palette tokens — remapped for light surfaces.
+       Keep token NAMES identical so existing utility classes
+       (bg-forest, text-shade-50, etc.) automatically re-theme. */
+    --void: 0 0% 100%;                /* "void" inverts to canvas white */
+    --deep-teal: 60 14% 98%;          /* page surface */
+    --dark-forest: 0 0% 100%;         /* input/card surface → white */
+    --forest: 60 9% 94%;              /* elevated surface → warm grey */
+    --neon-green: 154 78% 38%;        /* deeper green for AA on white */
+    --aloe: 154 60% 88%;              /* tinted accent surface */
+    --pistachio: 138 60% 92%;
+    --shade-30: 240 5% 26%;           /* swap: light text → dark text */
+    --shade-50: 240 4% 36%;           /* muted text on light */
+    --shade-60: 240 5% 50%;
+    --shade-70: 240 6% 88%;           /* borders on light */
+
+    --overlay: 0 0% 0%;               /* black tint on light theme */
+    --overlay-inverse: 0 0% 100%;
+
+    color-scheme: light;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), Helvetica, Arial, sans-serif;
+    font-feature-settings: "ss03" 1;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-display {
+    font-family: var(--font-display), Helvetica, Arial, sans-serif;
+    font-feature-settings: "ss03" 1;
+  }
 }
