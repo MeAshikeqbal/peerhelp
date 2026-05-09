@@ -44,7 +44,6 @@ export function AdminNav({
   const router = useRouter();
 
   useEffect(() => {
-    if (user) return;
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user: u } }) => {
       if (!u?.email) return;
@@ -55,7 +54,8 @@ export function AdminNav({
         .maybeSingle();
       setUser({ email: u.email, initials: getInitials(null, u.email), isSuperAdmin, avatarUrl: profile?.avatar_url ?? null });
     });
-  }, [user, isSuperAdmin]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     setAvatarOpen(false);

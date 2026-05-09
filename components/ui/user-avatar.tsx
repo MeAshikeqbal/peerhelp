@@ -16,9 +16,9 @@ export function getInitials(name?: string | null, email?: string | null): string
   }
   if (email) {
     const local = email.split("@")[0];
-    const parts = local.split(/[._-]/);
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return local.slice(0, 2).toUpperCase();
+    const parts = local.split(/[._-]/).filter(Boolean);
+    if (parts.length >= 2) return ((parts[0]?.[0] || local[0] || "") + (parts[1]?.[0] || local[1] || "")).toUpperCase();
+    return (local.slice(0, 2) || "").toUpperCase();
   }
   return "?";
 }
