@@ -97,7 +97,7 @@ export function PublicNav() {
                 ))}
               </nav>
 
-              <div className="mt-auto flex flex-col gap-2 border-t border-border px-4 py-5">
+              <div className="mt-auto flex flex-col gap-2 border-t border-border px-4 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
                 {isLoggedIn ? (
                   <SheetClose asChild>
                     <Button asChild variant="default" className="w-full">
