@@ -36,14 +36,11 @@ export async function subscribeUserToPush(): Promise<void> {
   }
 
   // Ensure a service worker is registered — register on-demand if missing.
-  try {
-    const existing = await navigator.serviceWorker.getRegistration();
-    if (!existing) {
-      // register the app service worker at root
-      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-    }
-  } catch (err) {
-    console.warn("Failed to ensure service worker registration:", err);
+  // Do NOT swallow errors here: if registration fails and no active SW exists,
+  // navigator.serviceWorker.ready would hang forever.
+  const existing = await navigator.serviceWorker.getRegistration();
+  if (!existing) {
+    await navigator.serviceWorker.register("/sw.js", { scope: "/" });
   }
 
   const registration = await navigator.serviceWorker.ready;
