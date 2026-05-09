@@ -410,11 +410,3 @@ psql <connection-string> -f supabase/seed-admins.sql
 - [ ] Bulk listing tools for graduating seniors
 
 ---
-
-<div align="center">
-
-**Private project.**&ensp;Source shared for portfolio review only.
-Not open source — not licensed for redistribution or reuse.
-Want to discuss the architecture?&ensp;Reach out directly.
-
-</div>
