@@ -1,9 +1,10 @@
-import { ImageResponse } from "next/og";
-import { renderLogoMark } from "../_icon";
+import { readFile } from "fs/promises";
+import { join } from "path";
+import { NextResponse } from "next/server";
 
-export function GET() {
-  return new ImageResponse(renderLogoMark(512, 512), {
-    width: 512,
-    height: 512,
+export async function GET() {
+  const file = await readFile(join(process.cwd(), "public", "icon.png"));
+  return new NextResponse(file, {
+    headers: { "Content-Type": "image/png" },
   });
 }

@@ -103,7 +103,7 @@ export function AdminNav({
       : "text-sm font-medium px-3 py-1.5 rounded-full text-shade-50 hover:text-foreground hover:bg-overlay/5 transition-colors";
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-overlay/[0.06] bg-deep-teal/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-40 border-b border-overlay/[0.06] bg-deep-teal/80 backdrop-blur-md safe-area-top">
       <div className="mx-auto max-w-[1280px] px-6 md:px-10 lg:px-16">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">

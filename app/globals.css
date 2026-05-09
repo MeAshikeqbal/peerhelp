@@ -122,3 +122,11 @@
     font-feature-settings: "ss03" 1;
   }
 }
+
+/* PWA safe-area — respects iPhone notch/Dynamic Island in standalone mode */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}

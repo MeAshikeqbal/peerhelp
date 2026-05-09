@@ -4,9 +4,9 @@
  */
 
 export function renderLogoMark(width: number, height: number) {
-  const textSize = Math.round(width * 0.22);
-  const slashSize = Math.round(width * 0.2);
-  const padding = Math.round(width * 0.14);
+  const radius = Math.round(width * 0.1875); // ~12/64 ratio
+  const pSize = Math.round(width * 0.5);
+  const slashSize = Math.round(width * 0.4375);
 
   return (
     <div
@@ -17,64 +17,30 @@ export function renderLogoMark(width: number, height: number) {
         alignItems: "center",
         justifyContent: "center",
         background: "#0a0a0a",
-        padding: `${padding}px`,
+        borderRadius: `${radius}px`,
       }}
     >
       <div style={{ display: "flex", alignItems: "baseline" }}>
-        {/* "Peer" — dominant */}
+        {/* "P" — bold white */}
         <span
           style={{
             fontFamily: "system-ui, -apple-system, sans-serif",
             fontWeight: 700,
-            fontSize: textSize,
+            fontSize: pSize,
             color: "#ffffff",
-            letterSpacing: textSize * 0.12,
+            letterSpacing: 1,
           }}
         >
-          Peer
+          P
         </span>
-        {/* "Help" — receded */}
-        <span
-          style={{
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            fontWeight: 600,
-            fontSize: textSize,
-            color: "rgba(255,255,255,0.65)",
-            letterSpacing: textSize * 0.12,
-          }}
-        >
-          Help
-        </span>
-        {/* "///" — neon-green brand accent */}
+        {/* "/" — neon-green brand accent */}
         <span
           style={{
             fontFamily: "system-ui, -apple-system, sans-serif",
             fontWeight: 500,
             fontSize: slashSize,
             color: "#36F4A4",
-            marginLeft: Math.round(width * 0.025),
-          }}
-        >
-          /
-        </span>
-        <span
-          style={{
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            fontWeight: 300,
-            fontSize: Math.round(slashSize * 0.9),
-            color: "#36F4A4",
-            opacity: 0.75,
-          }}
-        >
-          /
-        </span>
-        <span
-          style={{
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            fontWeight: 100,
-            fontSize: Math.round(slashSize * 0.8),
-            color: "#36F4A4",
-            opacity: 0.45,
+            marginLeft: Math.round(width * 0.03),
           }}
         >
           /
