@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { TutorForm } from "@/components/tutor/TutorForm";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getProfileById } from "@/utils/query/profiles";
-import { getOwnTutorProfile } from "@/utils/query/tutors";
 
 export default async function CreateTutorPage() {
   const supabase = await createClient();
@@ -13,11 +12,6 @@ export default async function CreateTutorPage() {
   const { data: profile } = await getProfileById(supabase, user.id);
   if (profile?.verification_status !== "verified") {
     redirect("/student-verification");
-  }
-
-  const { data: existing } = await getOwnTutorProfile(supabase, user.id);
-  if (existing) {
-    redirect("/dashboard/tutoring");
   }
 
   return (

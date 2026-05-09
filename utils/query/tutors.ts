@@ -99,6 +99,38 @@ export async function getOwnTutorProfile(supabase: DB, userId: string) {
     .maybeSingle();
 }
 
+/** All tutor profiles belonging to the caller, ordered newest first. */
+export async function getOwnTutorProfiles(supabase: DB, userId: string) {
+  return supabase
+    .from("tutor_profiles")
+    .select(TUTOR_DETAIL_COLUMNS)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+}
+
+/**
+ * All active tutor_profiles for a given user, optionally excluding one
+ * specific profile (useful for "Other offerings" on a detail page).
+ */
+export async function getActiveTutorsByUser(
+  supabase: DB,
+  userId: string,
+  excludeId?: string,
+) {
+  let query = supabase
+    .from("tutor_profiles")
+    .select(TUTOR_LIST_COLUMNS)
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .order("created_at", { ascending: false });
+
+  if (excludeId) {
+    query = query.neq("id", excludeId);
+  }
+
+  return query;
+}
+
 export async function createTutorProfile(
   supabase: DB,
   data: TutorProfileInsert,

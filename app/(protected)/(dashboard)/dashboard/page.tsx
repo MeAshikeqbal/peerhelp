@@ -187,8 +187,8 @@ async function DashboardContent() {
                 </Link>
               </>
             ) : tutor ? (
-              <Link href="/dashboard/tutoring/edit" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto">Edit profile</Button>
+              <Link href="/dashboard/tutoring" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">Manage offerings</Button>
               </Link>
             ) : (
               <Link href="/dashboard/tutoring/create" className="w-full sm:w-auto">

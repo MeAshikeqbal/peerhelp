@@ -4,15 +4,15 @@ import {
   GraduationCap,
   Inbox,
   PencilLine,
+  Plus,
   Send,
-  Sparkles,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getProfileById } from "@/utils/query/profiles";
-import { getOwnTutorProfile } from "@/utils/query/tutors";
+import { getOwnTutorProfiles } from "@/utils/query/tutors";
 
 const STATUS_LABEL: Record<string, string> = {
   active: "Active",
@@ -36,7 +36,8 @@ export default async function TutoringHomePage() {
     redirect("/student-verification");
   }
 
-  const { data: tutor } = await getOwnTutorProfile(supabase, user.id);
+  const { data: tutors } = await getOwnTutorProfiles(supabase, user.id);
+  const hasTutors = tutors && tutors.length > 0;
 
   return (
     <>
@@ -49,58 +50,68 @@ export default async function TutoringHomePage() {
             Offer your help to peers or track sessions you&apos;ve booked.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link href="/dashboard/tutoring/learning">
             <Button variant="outline">
               <Send size={14} className="mr-1.5" /> My requests
             </Button>
           </Link>
-          {tutor && (
+          {hasTutors && (
             <Link href="/dashboard/tutoring/requests">
               <Button variant="outline">
                 <Inbox size={14} className="mr-1.5" /> Incoming
               </Button>
             </Link>
           )}
+          <Link href="/dashboard/tutoring/create">
+            <Button>
+              <Plus size={14} className="mr-1.5" /> New offering
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {tutor ? (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-border bg-overlay/[0.02] p-6">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="flex-1 min-w-0">
-                <Badge
-                  variant="outline"
-                  className={`mb-3 ${STATUS_COLOR[tutor.status] ?? ""}`}
-                >
-                  {STATUS_LABEL[tutor.status] ?? tutor.status}
-                </Badge>
-                <h2 className="font-display text-xl font-semibold text-foreground mb-1">
-                  {tutor.headline}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  ₹{tutor.hourly_rate.toLocaleString("en-IN")} / hour ·{" "}
-                  {tutor.subjects.slice(0, 4).join(", ")}
-                  {tutor.subjects.length > 4
-                    ? ` +${tutor.subjects.length - 4}`
-                    : ""}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Link href={`/tutors/${tutor.id}`}>
-                  <Button variant="outline" size="sm">
-                    View public page
-                  </Button>
-                </Link>
-                <Link href="/dashboard/tutoring/edit">
-                  <Button size="sm">
-                    <PencilLine size={14} className="mr-1.5" /> Edit
-                  </Button>
-                </Link>
+      {hasTutors ? (
+        <div className="space-y-4">
+          {tutors!.map((tutor) => (
+            <div
+              key={tutor.id}
+              className="rounded-2xl border border-border bg-overlay/[0.02] p-6"
+            >
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <Badge
+                    variant="outline"
+                    className={`mb-3 ${STATUS_COLOR[tutor.status] ?? ""}`}
+                  >
+                    {STATUS_LABEL[tutor.status] ?? tutor.status}
+                  </Badge>
+                  <h2 className="font-display text-xl font-semibold text-foreground mb-1">
+                    {tutor.headline}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    ₹{tutor.hourly_rate.toLocaleString("en-IN")} / hour ·{" "}
+                    {tutor.subjects.slice(0, 4).join(", ")}
+                    {tutor.subjects.length > 4
+                      ? ` +${tutor.subjects.length - 4}`
+                      : ""}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Link href={`/tutors/${tutor.id}`}>
+                    <Button variant="outline" size="sm">
+                      View public page
+                    </Button>
+                  </Link>
+                  <Link href={`/dashboard/tutoring/edit/${tutor.id}`}>
+                    <Button size="sm">
+                      <PencilLine size={14} className="mr-1.5" /> Edit
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       ) : (
         <div className="rounded-2xl border border-border bg-overlay/[0.02] p-8 text-center">
@@ -116,7 +127,7 @@ export default async function TutoringHomePage() {
           </p>
           <Link href="/dashboard/tutoring/create">
             <Button>
-              <Sparkles size={14} className="mr-1.5" /> Create tutor profile
+              <Plus size={14} className="mr-1.5" /> Create first offering
             </Button>
           </Link>
         </div>
