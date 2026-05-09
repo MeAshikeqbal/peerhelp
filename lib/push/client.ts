@@ -45,11 +45,20 @@ export async function subscribeUserToPush(): Promise<void> {
 
   const registration = await navigator.serviceWorker.ready;
 
-  // Subscribe with application server key
+  // If a subscription already exists (potentially from a different VAPID key),
+  // unsubscribe it first. Keeping a stale subscription causes:
+  //   AbortError: Registration failed - push service error
+  const existingSub = await registration.pushManager.getSubscription();
+  if (existingSub) {
+    await existingSub.unsubscribe();
+  }
+
+  // Pass the Uint8Array directly — using .buffer risks passing a larger shared
+  // ArrayBuffer with an offset, which the push service rejects.
   const keyBytes = urlBase64ToUint8Array(publicKey);
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: keyBytes.buffer as ArrayBuffer,
+    applicationServerKey: keyBytes,
   });
 
   const { endpoint, keys } = subscription.toJSON() as {
