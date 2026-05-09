@@ -56,8 +56,7 @@ export async function sendPushToUser(
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: subs, error } = await (admin as any)
+  const { data: subs, error } = await admin
     .from("push_subscriptions")
     .select("endpoint, p256dh, auth")
     .eq("user_id", userId);
@@ -66,7 +65,7 @@ export async function sendPushToUser(
     console.error("sendPushToUser: failed query push_subscriptions", error);
     return;
   }
-  if (!subs || (subs as unknown[]).length === 0) return;
+  if (!subs || subs.length === 0) return;
 
   const targetUrl =
     payload.url ?? (payload.type ? TYPE_URL[payload.type] : "/dashboard");
@@ -78,32 +77,29 @@ export async function sendPushToUser(
     icon: payload.icon ?? "/api/pwa/icon-192",
   });
 
-  const sends = (subs as { endpoint: string; p256dh: string; auth: string }[]).map(
-    async (sub) => {
-      try {
-        await webPush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          notifPayload
-        );
-      } catch (err) {
-        // Prune expired/invalid subscriptions (410 Gone, 404 Not Found)
-        const status = (err as { statusCode?: number }).statusCode;
-        console.warn("sendPushToUser: push send error", { endpoint: sub.endpoint, status, err });
-        if (status === 410 || status === 404) {
-          try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (admin as any)
-              .from("push_subscriptions")
-              .delete()
-              .eq("endpoint", sub.endpoint);
-            console.info("sendPushToUser: removed stale push subscription", sub.endpoint);
-          } catch (delErr) {
-            console.error("sendPushToUser: failed to delete stale subscription", delErr);
-          }
+  const sends = subs.map(async (sub) => {
+    try {
+      await webPush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+        notifPayload
+      );
+    } catch (err) {
+      // Prune expired/invalid subscriptions (410 Gone, 404 Not Found)
+      const status = (err as { statusCode?: number }).statusCode;
+      console.warn("sendPushToUser: push send error", { endpoint: sub.endpoint, status, err });
+      if (status === 410 || status === 404) {
+        try {
+          await admin
+            .from("push_subscriptions")
+            .delete()
+            .eq("endpoint", sub.endpoint);
+          console.info("sendPushToUser: removed stale push subscription", sub.endpoint);
+        } catch (delErr) {
+          console.error("sendPushToUser: failed to delete stale subscription", delErr);
         }
       }
     }
-  );
+  });
 
   await Promise.allSettled(sends);
 }

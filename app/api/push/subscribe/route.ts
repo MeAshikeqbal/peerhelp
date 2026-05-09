@@ -34,8 +34,7 @@ export async function POST(request: Request) {
   }
 
   // Upsert: one subscription per endpoint (device/browser)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("push_subscriptions")
     .upsert(
       {
@@ -44,6 +43,7 @@ export async function POST(request: Request) {
         p256dh,
         auth,
         user_agent: userAgent ?? null,
+        updated_at: new Date().toISOString(),
       },
       { onConflict: "endpoint" }
     );
@@ -78,8 +78,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Missing endpoint" }, { status: 400 });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from("push_subscriptions")
     .delete()
     .eq("user_id", user.id)

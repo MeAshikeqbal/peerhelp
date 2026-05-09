@@ -134,20 +134,24 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url ?? "/dashboard";
+  const targetFullUrl = new URL(targetUrl, self.location.origin).href;
 
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
+        // Prefer an already-open tab whose URL starts with the target
+        // (handles cases where targetUrl has query params / hash).
         for (const client of clientList) {
-          if (
+          if (client.url.startsWith(new URL(targetUrl, self.location.origin).origin) &&
             new URL(client.url).pathname === new URL(targetUrl, self.location.origin).pathname &&
             "focus" in client
           ) {
+            client.navigate(targetFullUrl);
             return client.focus();
           }
         }
-        if (clients.openWindow) return clients.openWindow(targetUrl);
+        if (clients.openWindow) return clients.openWindow(targetFullUrl);
       })
   );
 });
