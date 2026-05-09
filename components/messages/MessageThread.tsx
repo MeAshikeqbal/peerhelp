@@ -352,7 +352,7 @@ export function MessageThread(props: MessageThreadProps) {
                 className={`flex ${mine ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words leading-relaxed ${
+                  className={`max-w-[85%] md:max-w-[72%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words leading-relaxed ${
                     mine
                       ? "bg-neon-green/[0.14] text-foreground border border-neon-green/20 rounded-br-md"
                       : "bg-overlay/[0.05] text-foreground border border-overlay/[0.08] rounded-bl-md"
@@ -418,7 +418,7 @@ export function MessageThread(props: MessageThreadProps) {
                   void send(e as unknown as React.FormEvent);
                 }
               }}
-              placeholder="Write a message… (Enter to send, Shift+Enter for newline)"
+              placeholder="Write a message…"
               rows={1}
               maxLength={2000}
               className="flex-1 resize-none rounded-xl border border-overlay/15 bg-overlay/[0.04] px-3 py-2 text-sm text-foreground placeholder:text-shade-50/60 focus:border-neon-green/40 focus:outline-none transition-colors max-h-32"

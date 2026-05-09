@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -10,8 +11,27 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "PeerHelp",
+  title: {
+    default: "PeerHelp",
+    template: "%s | PeerHelp",
+  },
   description: "PeerHelp - Campus Resource Exchange",
+  applicationName: "PeerHelp",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "PeerHelp",
+  },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#36F4A4",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+  viewportFit: "cover",
 };
 
 const inter = Inter({
@@ -70,6 +90,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <ServiceWorkerRegister />
         </ThemeProvider>
       </body>
     </html>

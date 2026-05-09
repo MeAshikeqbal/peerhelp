@@ -3,6 +3,7 @@ import {
   sendNotificationEmail,
   type NotificationEmailType,
 } from "@/lib/email/send-notification-email";
+import { sendPushToUser } from "@/lib/push/server";
 
 export type NotificationType = NotificationEmailType;
 
@@ -61,4 +62,9 @@ export async function notifyUser(
       dealId,
     });
   }
+
+  // 3. Fire-and-forget push notification (non-blocking)
+  sendPushToUser(recipientId, { title, body, type }).catch(() => {
+    // Push is best-effort — errors are handled inside sendPushToUser
+  });
 }

@@ -37,10 +37,10 @@ export default async function MessagesLayout({
     <div className="flex flex-col gap-4">
       {/* Page header */}
       <div>
-        <h1 className="font-display text-3xl font-bold text-foreground mb-1">
+        <h1 className="font-display text-xl md:text-3xl font-bold text-foreground mb-1">
           Messages
         </h1>
-        <p className="text-sm text-shade-50">
+        <p className="hidden md:block text-sm text-shade-50">
           Chat with buyers, sellers, and tutors about your active deals and
           requests.
         </p>

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { AppNav } from "@/components/nav/AppNav";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadMessagesCount } from "@/utils/query/messages";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 async function NavWithPending() {
   const supabase = await createClient();
@@ -56,6 +57,8 @@ export default function DashboardLayout({
           {children}
         </Suspense>
       </main>
+
+      <InstallPrompt />
     </div>
   );
 }
