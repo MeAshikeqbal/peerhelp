@@ -2,11 +2,14 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Cropper from "react-easy-crop";
+import dynamic from "next/dynamic";
 import type { Area } from "react-easy-crop";
 import { Camera, X, Check, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/ui/user-avatar";
+
+// Only load the heavy cropper library when the modal is actually open
+const Cropper = dynamic(() => import("react-easy-crop"), { ssr: false });
 
 interface AvatarUploaderProps {
   currentUrl: string | null;

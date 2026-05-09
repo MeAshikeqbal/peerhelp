@@ -1,23 +1,39 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ShieldCheck, Clock, ShieldAlert,
   BookOpen, Handshake, GraduationCap,
   Mail, Building2, KeyRound, ChevronRight, Phone, Bell, Ban,
 } from "lucide-react";
-import { AvatarUploader } from "@/components/profile/AvatarUploader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { PhoneForm } from "@/components/profile/PhoneForm";
 import { ReverifyButton } from "@/components/profile/ReverifyButton";
-import { NotificationPrefsForm } from "@/components/profile/NotificationPrefsForm";
-import { BlockedUsersList } from "@/components/profile/BlockedUsersList";
-import { PushSubscribeButton } from "@/components/pwa/PushSubscribeButton";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getProfileById, getOwnPhone } from "@/utils/query/profiles";
 import { countUserListings } from "@/utils/query/listings";
 import { countUserDeals } from "@/utils/query/deals";
 import { getNotificationPrefs } from "@/utils/query/notifications";
+
+// Lazy-load heavy / below-the-fold client components to keep the initial bundle lean
+const AvatarUploader = dynamic(
+  () => import("@/components/profile/AvatarUploader").then((m) => m.AvatarUploader),
+  { ssr: false, loading: () => <Skeleton className="h-16 w-16 sm:h-20 sm:w-20 rounded-full shrink-0" /> },
+);
+const NotificationPrefsForm = dynamic(
+  () => import("@/components/profile/NotificationPrefsForm").then((m) => m.NotificationPrefsForm),
+  { ssr: false, loading: () => <div className="px-6 py-4"><Skeleton className="h-5 w-full" /></div> },
+);
+const BlockedUsersList = dynamic(
+  () => import("@/components/profile/BlockedUsersList").then((m) => m.BlockedUsersList),
+  { ssr: false, loading: () => <div className="px-6 py-4"><Skeleton className="h-5 w-48" /></div> },
+);
+const PushSubscribeButton = dynamic(
+  () => import("@/components/pwa/PushSubscribeButton").then((m) => m.PushSubscribeButton),
+  { ssr: false, loading: () => <div className="px-6 py-4"><Skeleton className="h-9 w-40" /></div> },
+);
 
 function VerificationBadge({ status }: { status: string | null }) {
   if (status === "verified") {
@@ -49,14 +65,13 @@ export default async function ProfilePage() {
   const { user, error: userError } = await getCurrentUser(supabase);
   if (userError || !user) redirect("/auth/login");
 
-  const [{ data: profile }, { count: listingsCount }, { count: dealsCount }, { data: phoneData }] = await Promise.all([
+  const [{ data: profile }, { count: listingsCount }, { count: dealsCount }, { data: phoneData }, notifPrefs] = await Promise.all([
     getProfileById(supabase, user.id),
     countUserListings(supabase, user.id),
     countUserDeals(supabase, user.id),
     getOwnPhone(supabase),
+    getNotificationPrefs(supabase, user.id),
   ]);
-
-  const notifPrefs = await getNotificationPrefs(supabase, user.id);
 
   const phoneNumber = (phoneData as string | null) ?? null;
 
