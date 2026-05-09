@@ -6,18 +6,20 @@ import {
   BookOpen, Handshake, GraduationCap,
   Mail, Building2, KeyRound, ChevronRight, Phone, Bell, Ban,
 } from "lucide-react";
-import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { PhoneForm } from "@/components/profile/PhoneForm";
 import { ReverifyButton } from "@/components/profile/ReverifyButton";
-import { NotificationPrefsForm } from "@/components/profile/NotificationPrefsForm";
-import { BlockedUsersList } from "@/components/profile/BlockedUsersList";
-import { PushSubscribeButton } from "@/components/pwa/PushSubscribeButton";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getProfileById, getOwnPhone } from "@/utils/query/profiles";
 import { countUserListings } from "@/utils/query/listings";
 import { countUserDeals } from "@/utils/query/deals";
 import { getNotificationPrefs } from "@/utils/query/notifications";
+import {
+  AvatarUploader,
+  NotificationPrefsForm,
+  BlockedUsersList,
+  PushSubscribeButton,
+} from "./ProfileDynamicComponents";
 
 function VerificationBadge({ status }: { status: string | null }) {
   if (status === "verified") {
@@ -49,14 +51,13 @@ export default async function ProfilePage() {
   const { user, error: userError } = await getCurrentUser(supabase);
   if (userError || !user) redirect("/auth/login");
 
-  const [{ data: profile }, { count: listingsCount }, { count: dealsCount }, { data: phoneData }] = await Promise.all([
+  const [{ data: profile }, { count: listingsCount }, { count: dealsCount }, { data: phoneData }, notifPrefs] = await Promise.all([
     getProfileById(supabase, user.id),
     countUserListings(supabase, user.id),
     countUserDeals(supabase, user.id),
     getOwnPhone(supabase),
+    getNotificationPrefs(supabase, user.id),
   ]);
-
-  const notifPrefs = await getNotificationPrefs(supabase, user.id);
 
   const phoneNumber = (phoneData as string | null) ?? null;
 

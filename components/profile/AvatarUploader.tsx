@@ -73,7 +73,6 @@ export function AvatarUploader({ currentUrl, name, email }: AvatarUploaderProps)
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
       setError("Image must be under 5 MB.");
-      e.target.value = "";
       return;
     }
     const reader = new FileReader();
@@ -82,7 +81,6 @@ export function AvatarUploader({ currentUrl, name, email }: AvatarUploaderProps)
       setModalOpen(true);
       setCrop({ x: 0, y: 0 });
       setZoom(1);
-      setCroppedAreaPixels(null);
       setError(null);
     };
     reader.readAsDataURL(file);
@@ -120,14 +118,7 @@ export function AvatarUploader({ currentUrl, name, email }: AvatarUploaderProps)
         .from("profiles")
         .update({ avatar_url: publicUrl })
         .eq("id", user.id);
-      if (updateError) {
-        // Roll back the uploaded file to avoid orphaned storage objects
-        const { error: deleteError } = await supabase.storage
-          .from("images")
-          .remove([path]);
-        if (deleteError) console.error("Rollback delete failed:", deleteError.message);
-        throw new Error(updateError.message);
-      }
+      if (updateError) throw new Error(updateError.message);
 
       setModalOpen(false);
       setImageSrc(null);
@@ -142,7 +133,6 @@ export function AvatarUploader({ currentUrl, name, email }: AvatarUploaderProps)
   function handleCancel() {
     setModalOpen(false);
     setImageSrc(null);
-    setCroppedAreaPixels(null);
     setError(null);
   }
 
@@ -189,7 +179,6 @@ export function AvatarUploader({ currentUrl, name, email }: AvatarUploaderProps)
               <button
                 type="button"
                 onClick={handleCancel}
-                aria-label="Close avatar uploader"
                 className="p-1 rounded-lg text-shade-50 hover:text-foreground hover:bg-overlay/5 transition-colors"
               >
                 <X size={16} />

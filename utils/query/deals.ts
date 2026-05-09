@@ -77,9 +77,9 @@ export async function countUserDeals(
 }
 
 /**
- * True if the listing has any deal in `accepted` or `completed` state — i.e.
- * a buyer has a binding agreement and the listing should be partially locked
- * against edits that would change what the buyer agreed to.
+ * True if the listing has any deal in `pending`, `accepted`, or `completed`
+ * state — i.e. a buyer has submitted a request and the listing should be
+ * partially locked against edits that would change what the buyer sees.
  */
 export async function hasBlockingDeal(
   supabase: DB,
@@ -89,7 +89,7 @@ export async function hasBlockingDeal(
     .from("deals")
     .select("id", { count: "exact", head: true })
     .eq("listing_id", listingId)
-    .in("status", ["accepted", "completed"]);
+    .in("status", ["pending", "accepted", "completed"]);
   if (error) {
     console.error("hasBlockingDeal error:", error);
     return false;

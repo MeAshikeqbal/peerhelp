@@ -44,6 +44,7 @@ export function AdminNav({
   const router = useRouter();
 
   useEffect(() => {
+    if (user) return;
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user: u } }) => {
       if (!u?.email) return;
@@ -54,8 +55,7 @@ export function AdminNav({
         .maybeSingle();
       setUser({ email: u.email, initials: getInitials(null, u.email), isSuperAdmin, avatarUrl: profile?.avatar_url ?? null });
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuperAdmin]);
+  }, [user, isSuperAdmin]);
 
   useEffect(() => {
     setAvatarOpen(false);
@@ -103,7 +103,7 @@ export function AdminNav({
       : "text-sm font-medium px-3 py-1.5 rounded-full text-shade-50 hover:text-foreground hover:bg-overlay/5 transition-colors";
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-overlay/[0.06] bg-deep-teal/80 backdrop-blur-md safe-area-top">
+    <nav className="sticky top-0 z-40 border-b border-overlay/[0.06] bg-deep-teal/80 backdrop-blur-md">
       <div className="mx-auto max-w-[1280px] px-6 md:px-10 lg:px-16">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
@@ -223,7 +223,7 @@ export function AdminNav({
                   ))}
                 </nav>
 
-                <div className="mt-auto border-t border-border px-4 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] flex flex-col gap-1">
+                <div className="mt-auto border-t border-border px-4 py-5 flex flex-col gap-1">
                   {user && (
                     <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
                       <UserAvatar
