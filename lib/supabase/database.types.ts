@@ -63,6 +63,27 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       college_directory: {
         Row: {
           college_name: string
@@ -284,6 +305,151 @@ export type Database = {
         }
         Relationships: []
       }
+      message_reads: {
+        Row: {
+          last_read_at: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reports: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string | null
+          reason: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          thread_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reason: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          thread_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reason?: string
+          reported_user_id?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          thread_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reports_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_threads: {
+        Row: {
+          context_id: string
+          context_type: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          participant_a: string
+          participant_b: string
+        }
+        Insert: {
+          context_id: string
+          context_type: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant_a: string
+          participant_b: string
+        }
+        Update: {
+          context_id?: string
+          context_type?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant_a?: string
+          participant_b?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          recipient_id: string
+          sender_id: string
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          recipient_id: string
+          sender_id: string
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          recipient_id?: string
+          sender_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           email_deal_accepted: boolean
@@ -291,6 +457,7 @@ export type Database = {
           email_deal_completed: boolean
           email_deal_declined: boolean
           email_deal_requested: boolean
+          email_message_received: boolean
           email_rating_received: boolean
           email_tutor_request_received: boolean
           email_tutor_request_responded: boolean
@@ -303,6 +470,7 @@ export type Database = {
           email_deal_completed?: boolean
           email_deal_declined?: boolean
           email_deal_requested?: boolean
+          email_message_received?: boolean
           email_rating_received?: boolean
           email_tutor_request_received?: boolean
           email_tutor_request_responded?: boolean
@@ -315,6 +483,7 @@ export type Database = {
           email_deal_completed?: boolean
           email_deal_declined?: boolean
           email_deal_requested?: boolean
+          email_message_received?: boolean
           email_rating_received?: boolean
           email_tutor_request_received?: boolean
           email_tutor_request_responded?: boolean
@@ -649,6 +818,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _canon_pair: {
+        Args: { p1: string; p2: string }
+        Returns: Record<string, unknown>
+      }
+      _is_blocked_either_way: {
+        Args: { u1: string; u2: string }
+        Returns: boolean
+      }
       admin_decide_verification: {
         Args: {
           p_decision: string
@@ -658,6 +835,27 @@ export type Database = {
           p_verification_id: string
         }
         Returns: Json
+      }
+      admin_get_thread_messages: {
+        Args: { p_thread_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          recipient_id: string
+          sender_id: string
+          thread_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "messages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      block_user: {
+        Args: { p_reason?: string; p_user_id: string }
+        Returns: undefined
       }
       create_notification: {
         Args: {
@@ -699,6 +897,7 @@ export type Database = {
           email_deal_completed: boolean
           email_deal_declined: boolean
           email_deal_requested: boolean
+          email_message_received: boolean
           email_rating_received: boolean
           email_tutor_request_received: boolean
           email_tutor_request_responded: boolean
@@ -734,6 +933,20 @@ export type Database = {
         }
       }
       get_user_email: { Args: { p_user_id: string }; Returns: string }
+      get_user_threads: {
+        Args: never
+        Returns: {
+          context_id: string
+          context_type: string
+          counterpart_id: string
+          is_blocked: boolean
+          last_message_at: string
+          last_message_body: string
+          last_message_sender: string
+          thread_id: string
+          unread_count: number
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       log_verification_document_upload: {
@@ -745,8 +958,49 @@ export type Database = {
         Returns: undefined
       }
       mark_notifications_read: { Args: never; Returns: undefined }
+      mark_thread_read: { Args: { p_thread_id: string }; Returns: undefined }
+      report_message: {
+        Args: { p_message_id: string; p_reason: string; p_thread_id: string }
+        Returns: string
+      }
+      send_message: {
+        Args: { p_body: string; p_thread_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          recipient_id: string
+          sender_id: string
+          thread_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      start_or_get_thread: {
+        Args: { p_context_id: string; p_context_type: string }
+        Returns: {
+          context_id: string
+          context_type: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          participant_a: string
+          participant_b: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "message_threads"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      unblock_user: { Args: { p_user_id: string }; Returns: undefined }
       verify_student_otp: { Args: { p_otp: string }; Returns: Json }
     }
     Enums: {

@@ -8,6 +8,7 @@ import { BookOpen, CalendarDays, AlertTriangle, ChevronRight, Wallet, Coins, Sta
 import { DealActions } from "@/components/deals/DealActions";
 import { RatingForm } from "@/components/deals/RatingForm";
 import { ContactReveal } from "@/components/deals/ContactReveal";
+import { MessageButton } from "@/components/messages/MessageButton";
 
 export interface DealListingRow {
   id: string;
@@ -347,11 +348,18 @@ export function DealCard({ deal }: { deal: DealCardData }) {
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1.5">
                   {counterpartRole === "seller" ? "Seller" : "Buyer"} contact
                 </p>
-                <ContactReveal
-                  dealId={deal.id}
-                  counterpartRole={counterpartRole}
-                  counterpartName={deal.counterpartName}
-                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <ContactReveal
+                    dealId={deal.id}
+                    counterpartRole={counterpartRole}
+                    counterpartName={deal.counterpartName}
+                  />
+                  <MessageButton
+                    contextType="deal"
+                    contextId={deal.id}
+                    variant="compact"
+                  />
+                </div>
               </div>
             ) : (
               <span className="hidden sm:block" />

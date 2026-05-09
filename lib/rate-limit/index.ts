@@ -17,7 +17,9 @@ export type RateLimitType =
   | "admin_decision"
   | "verification_upload"
   | "tutor_create"
-  | "tutor_request";
+  | "tutor_request"
+  | "message_send"
+  | "user_report";
 
 export interface RateLimitResult {
   allowed: boolean;

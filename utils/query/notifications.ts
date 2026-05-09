@@ -22,6 +22,7 @@ export interface NotificationPreferences {
   email_rating_received: boolean;
   email_tutor_request_received: boolean;
   email_tutor_request_responded: boolean;
+  email_message_received: boolean;
   updated_at: string;
 }
 

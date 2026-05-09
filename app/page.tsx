@@ -3,6 +3,8 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { MarketplacePreview } from "@/components/landing/MarketplacePreview";
 import { CTASection } from "@/components/landing/CTASection";
+import { Footer } from "@/components/landing/Footer";
+
 
 export default function Home() {
   return (
@@ -19,6 +21,7 @@ export default function Home() {
         <MarketplacePreview />
         <CTASection />
       </main>
+      <Footer />
     </div>
   );
 }

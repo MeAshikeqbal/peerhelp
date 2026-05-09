@@ -10,15 +10,13 @@ import { validateImageUrl } from "@/lib/listing-image";
  * or once the listing itself transitions to `sold`/`reserved`. These represent
  * what the buyer agreed to and must not change underneath them.
  */
-const LOCKED_FIELDS = [
-  "title",
-  "condition",
-  "price",
-  "image_url",
-  "material_type",
-  "subject",
-] as const;
-type LockedField = (typeof LOCKED_FIELDS)[number];
+type LockedField =
+  | "title"
+  | "condition"
+  | "price"
+  | "image_url"
+  | "material_type"
+  | "subject";
 
 export async function PATCH(
   request: Request,
