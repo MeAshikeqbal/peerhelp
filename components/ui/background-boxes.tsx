@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -18,8 +18,22 @@ const COLORS = [
 const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
 const BackgroundBoxesCore = ({ className }: { className?: string }) => {
-  const rows = new Array(150).fill(1);
-  const cols = new Array(100).fill(1);
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Skip entirely on mobile — even 2 400 motion.div elements kills perf on phones
+  if (isMobile) return null;
+
+  // Reduced from 150×100 (15 000) to 60×40 (2 400) for desktop
+  const rows = new Array(60).fill(1);
+  const cols = new Array(40).fill(1);
 
   return (
     <div
