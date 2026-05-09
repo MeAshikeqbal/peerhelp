@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 import { ReportDialog } from "@/components/messages/ReportDialog";
 import { ContextPreviewDialog } from "@/components/messages/ContextPreviewDialog";
-import Link from "next/link";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 type MessageRow = Tables<"messages">;
 
@@ -16,6 +16,7 @@ interface MessageThreadProps {
   currentUserId: string;
   counterpartId: string;
   counterpartName: string;
+  counterpartAvatarUrl?: string | null;
   initialMessages: MessageRow[];
   initialMyReadAt: string | null;
   initialTheirReadAt: string | null;
@@ -41,6 +42,7 @@ export function MessageThread(props: MessageThreadProps) {
     currentUserId,
     counterpartId,
     counterpartName,
+    counterpartAvatarUrl,
     initialMessages,
     initialMyReadAt,
     initialTheirReadAt,
@@ -255,9 +257,12 @@ export function MessageThread(props: MessageThreadProps) {
           </Link>
 
           {/* Avatar */}
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neon-green/10 text-neon-green text-sm font-semibold shrink-0">
-            {counterpartName.slice(0, 1).toUpperCase()}
-          </div>
+          <UserAvatar
+            size="sm"
+            src={counterpartAvatarUrl}
+            name={counterpartName}
+            className="h-9 w-9"
+          />
 
           {/* Name + context chip */}
           <div className="min-w-0">

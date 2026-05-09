@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DealActions } from "@/components/deals/DealActions";
 import { ContactReveal } from "@/components/deals/ContactReveal";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface DealRow {
   id: string;
@@ -51,11 +52,7 @@ export function SellerDealRequests({ sellerDeals }: SellerDealRequestsProps) {
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-overlay/[0.06] border border-border flex items-center justify-center shrink-0">
-                        <span className="text-xs font-semibold text-muted-foreground">
-                          {deal.buyerName[0].toUpperCase()}
-                        </span>
-                      </div>
+                      <UserAvatar size="sm" name={deal.buyerName} />
                       <div>
                         <p className="text-foreground text-sm font-medium">{deal.buyerName}</p>
                         <p className="text-muted-foreground text-xs">

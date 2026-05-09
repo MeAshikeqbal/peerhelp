@@ -14,6 +14,7 @@ import {
   LayoutList,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { getCurrentUser } from "@/utils/query/auth";
 import { getPublicProfile, getProfilesByIds } from "@/utils/query/profiles";
 import { getUserRatingsWithComments } from "@/utils/query/ratings";
@@ -179,14 +180,6 @@ async function ProfileContent({ id }: { id: string }) {
     ? new Date(profile.created_at).getFullYear()
     : null;
 
-  const initials = (profile.full_name?.trim() ?? "S")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w: string) => w[0])
-    .join("")
-    .toUpperCase();
-
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Back */}
@@ -205,9 +198,12 @@ async function ProfileContent({ id }: { id: string }) {
 
         <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 px-5 py-6 sm:px-7 sm:py-8">
           {/* Avatar */}
-          <div className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-full bg-neon-green/10 border-2 border-neon-green/20 flex items-center justify-center text-2xl font-bold font-display text-neon-green select-none">
-            {initials}
-          </div>
+          <UserAvatar
+            size="xl"
+            src={profile.avatar_url}
+            name={profile.full_name}
+            className="shrink-0 ring-2 ring-neon-green/20 border-2 border-neon-green/20"
+          />
 
           {/* Info */}
           <div className="flex-1 min-w-0">
@@ -320,9 +316,7 @@ async function ProfileContent({ id }: { id: string }) {
           <div className="divide-y divide-white/[0.05] border-t border-overlay/[0.05]">
             {ratings.map((r) => (
               <div key={r.id} className="flex items-start gap-4 px-6 py-4">
-                <div className="h-8 w-8 shrink-0 rounded-full bg-overlay/[0.06] border border-overlay/[0.1] flex items-center justify-center text-xs font-semibold text-muted-foreground select-none">
-                  {(nameMap[r.rater_id] ?? "S")[0].toUpperCase()}
-                </div>
+                <UserAvatar size="sm" name={nameMap[r.rater_id] ?? "Student"} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-sm font-medium text-foreground">

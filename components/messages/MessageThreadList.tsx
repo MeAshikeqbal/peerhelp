@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import type { UserThreadRow } from "@/utils/query/messages";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface ThreadListItemDisplay extends UserThreadRow {
   counterpart_name: string | null;
@@ -63,9 +64,11 @@ export function MessageThreadList({ initial, currentUserId }: MessageThreadListP
               href={`/dashboard/messages/${t.thread_id}`}
               className="flex items-center gap-3 px-4 py-3 hover:bg-overlay/5 transition-colors"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neon-green/10 text-neon-green text-sm font-semibold shrink-0">
-                {(t.counterpart_name ?? "?").slice(0, 1).toUpperCase()}
-              </div>
+              <UserAvatar
+                size="md"
+                name={t.counterpart_name}
+                className="shrink-0"
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="text-sm font-medium text-foreground truncate">

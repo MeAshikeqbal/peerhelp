@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GraduationCap, Star } from "lucide-react";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 function cleanCollegeName(name: string) {
   return name.replace(/\s*\(Id:[^)]*\)/gi, "").trim();
@@ -8,20 +9,17 @@ function cleanCollegeName(name: string) {
 interface SellerCardProps {
   sellerId?: string;
   sellerName: string;
+  sellerAvatarUrl?: string | null;
   isSeller: boolean;
   avgRating?: number;
   ratingCount?: number;
   collegeName?: string;
 }
 
-export function SellerCard({ sellerId, sellerName, isSeller, avgRating, ratingCount, collegeName }: SellerCardProps) {
+export function SellerCard({ sellerId, sellerName, sellerAvatarUrl, isSeller, avgRating, ratingCount, collegeName }: SellerCardProps) {
   const inner = (
     <div className="flex items-center gap-3">
-      <div className="h-8 w-8 rounded-full bg-overlay/[0.06] border border-border flex items-center justify-center shrink-0">
-        <span className="text-xs font-semibold text-muted-foreground">
-          {sellerName[0].toUpperCase()}
-        </span>
-      </div>
+      <UserAvatar size="sm" src={sellerAvatarUrl} name={sellerName} />
       <div>
         <p className="text-sm font-medium text-foreground group-hover:text-neon-green transition-colors">{sellerName}</p>
         {collegeName && (
