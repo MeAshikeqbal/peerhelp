@@ -55,7 +55,10 @@ export async function subscribeUserToPush(): Promise<void> {
 
   // Pass the Uint8Array directly — using .buffer risks passing a larger shared
   // ArrayBuffer with an offset, which the push service rejects.
-  const keyBytes = urlBase64ToUint8Array(publicKey);
+  // Cast to Uint8Array<ArrayBuffer>: new Uint8Array() always allocates a plain
+  // ArrayBuffer, but TypeScript infers ArrayBufferLike which doesn't satisfy
+  // the DOM's ArrayBufferView<ArrayBuffer> constraint on applicationServerKey.
+  const keyBytes = urlBase64ToUint8Array(publicKey) as Uint8Array<ArrayBuffer>;
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: keyBytes,
