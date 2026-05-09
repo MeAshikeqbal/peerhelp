@@ -316,7 +316,7 @@ export function PendingReviewView({
           >
             Questions?{" "}
             <a
-              href="mailto:support@peerhelp.app"
+              href="mailto:support@app.peerhelp.space"
               className="text-foreground transition-colors hover:text-neon-green"
             >
               Contact support

@@ -4,7 +4,7 @@ import { buildNotificationHtml } from "./templates";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
 const fromName = process.env.RESEND_FROM_NAME ?? "PeerHelp";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://peerhelp.app";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://peerhelp.space";
 
 export type NotificationEmailType =
   | "deal_requested"
