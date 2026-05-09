@@ -29,8 +29,12 @@ const TYPE_ICON: Record<string, string> = {
 export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(20);
+  const [pendingDismisses, setPendingDismisses] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
+  const [lastRemoved, setLastRemoved] = useState<Notification | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const esRef = useRef<EventSource | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   // Connect to SSE stream
   useEffect(() => {
@@ -68,19 +72,90 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Infinite scroll: increase display limit when sentinel visible
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setDisplayLimit((v) => Math.min(v + 20, notifications.length));
+        }
+      });
+    }, { root: panelRef.current, rootMargin: '200px' });
+
+    obs.observe(sentinelRef.current);
+    return () => obs.disconnect();
+  }, [notifications.length]);
+
   const markAllRead = useCallback(async () => {
-    await fetch("/api/notifications", { method: "POST" });
+    const ok = window.confirm("Mark all notifications as read?");
+    if (!ok) return;
+    // Optimistically clear UI
+    const prev = notifications;
     setNotifications([]);
+    try {
+      await fetch("/api/notifications", { method: "POST" });
+    } catch (err) {
+      // rollback on error
+      setNotifications(prev);
+    }
   }, []);
 
-  const markOneRead = useCallback(async (id: string) => {
-    await fetch("/api/notifications", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+  // Mark a single notification as read. If `immediate` is false, delay server call
+  // to allow an undo window.
+  const markOneRead = useCallback(async (id: string, immediate = false) => {
+    const toRemove = notifications.find((n) => n.id === id);
+    if (!toRemove) return;
+
+    // remove from UI immediately
     setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
+    setLastRemoved(toRemove);
+
+    if (immediate) {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      return;
+    }
+
+    // schedule server call after undo window
+    const timer = setTimeout(async () => {
+      try {
+        await fetch("/api/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+      } catch {
+        // ignore network errors for now
+      }
+      setPendingDismisses((prev) => {
+        const copy = { ...prev };
+        delete copy[id];
+        return copy;
+      });
+      setLastRemoved(null);
+    }, 4000);
+
+    setPendingDismisses((prev) => ({ ...prev, [id]: timer }));
+  }, [notifications]);
+
+  const undoLast = useCallback(() => {
+    if (!lastRemoved) return;
+    const id = lastRemoved.id;
+    // cancel pending timer if any
+    const t = pendingDismisses[id];
+    if (t) clearTimeout(t);
+    setPendingDismisses((prev) => {
+      const copy = { ...prev };
+      delete copy[id];
+      return copy;
+    });
+    setNotifications((prev) => [lastRemoved!, ...prev]);
+    setLastRemoved(null);
+  }, [lastRemoved, pendingDismisses]);
 
   const unreadCount = notifications.length;
 
@@ -89,6 +164,7 @@ export function NotificationBell() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+        aria-expanded={open}
         className="relative p-2 rounded-md text-shade-50 hover:text-foreground hover:bg-overlay/5 transition-colors"
       >
         <Bell size={18} />
@@ -100,10 +176,13 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 rounded-xl border border-overlay/[0.08] bg-deep-teal shadow-card-elevated overflow-hidden z-50">
+        <div className="absolute right-0 mt-2 w-96 rounded-xl border border-overlay/[0.08] bg-deep-teal shadow-card-elevated overflow-hidden z-50 transform transition-all origin-top-right animate-notif-enter">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-overlay/[0.06]">
-            <span className="text-sm font-medium text-foreground">Notifications</span>
+            <div className="flex items-center gap-2">
+              <Bell size={16} />
+              <span className="text-sm font-medium text-foreground">Notifications</span>
+            </div>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
@@ -121,51 +200,66 @@ export function NotificationBell() {
                 No new notifications
               </div>
             ) : (
-              notifications.map((n) => {
-                const href =
-                  n.deal_id
-                    ? "/dashboard/deals"
-                    : n.listing_id
-                    ? `/dashboard/listings/${n.listing_id}`
-                    : "/dashboard";
+              <>
+                {notifications.slice(0, displayLimit).map((n) => {
+                  const href =
+                    n.deal_id
+                      ? "/dashboard/deals"
+                      : n.listing_id
+                      ? `/dashboard/listings/${n.listing_id}`
+                      : "/dashboard";
 
-                return (
-                  <div
-                    key={n.id}
-                    className="group flex items-start gap-3 px-4 py-3 hover:bg-overlay/[0.04] border-b border-overlay/[0.04] last:border-0 transition-colors"
-                  >
-                    <span className="mt-0.5 text-base shrink-0">
-                      {TYPE_ICON[n.type] ?? "🔔"}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        href={href}
-                        onClick={() => markOneRead(n.id)}
-                        className="block"
-                      >
-                        <p className="text-sm font-medium text-foreground leading-snug">
-                          {n.title}
-                        </p>
-                        <p className="text-xs text-shade-50 mt-0.5 line-clamp-2">
-                          {n.body}
-                        </p>
-                        <p className="text-[10px] text-shade-70 mt-1">
-                          {relativeTime(n.created_at)}
-                        </p>
-                      </Link>
-                    </div>
-                    <button
-                      onClick={() => markOneRead(n.id)}
-                      className="shrink-0 p-1 rounded text-shade-70 hover:text-shade-50 transition-colors opacity-0 group-hover:opacity-100"
-                      aria-label="Dismiss"
+                  return (
+                    <div
+                      key={n.id}
+                      className="group flex items-start gap-3 px-4 py-3 hover:bg-overlay/[0.04] border-b border-overlay/[0.04] last:border-0 transition-colors"
                     >
-                      ×
-                    </button>
-                  </div>
-                );
-              })
+                      <span className="mt-0.5 text-base shrink-0">
+                        {TYPE_ICON[n.type] ?? "🔔"}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={href}
+                          onClick={() => markOneRead(n.id, true)}
+                          className="block"
+                        >
+                          <p className="text-sm font-medium text-foreground leading-snug">
+                            {n.title}
+                          </p>
+                          <p className="text-xs text-shade-50 mt-0.5 line-clamp-2">
+                            {n.body}
+                          </p>
+                          <p className="text-[10px] text-shade-70 mt-1">
+                            {relativeTime(n.created_at)}
+                          </p>
+                        </Link>
+                      </div>
+                      <button
+                        onClick={() => markOneRead(n.id)}
+                        className="shrink-0 p-1 rounded text-shade-70 hover:text-shade-50 transition-colors opacity-0 group-hover:opacity-100"
+                        aria-label="Dismiss"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {/* sentinel for loading more */}
+                <div ref={sentinelRef} className="h-2" />
+              </>
             )}
           </div>
+
+          {/* Undo toast */}
+          {lastRemoved && (
+            <div className="px-4 py-3 border-t border-overlay/[0.06] bg-overlay/5 flex items-center justify-between">
+              <span className="text-sm text-shade-50">Notification dismissed</span>
+              <div className="flex items-center gap-2">
+                <button onClick={undoLast} className="text-xs text-neon-green">Undo</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
