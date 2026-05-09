@@ -184,7 +184,7 @@ export default function EditListingForm({ listing, isLocked }: EditListingFormPr
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {isLocked
-            ? "A deal is in progress. Pickup details remain editable."
+            ? "There's an open request on this listing. Pickup details remain editable."
             : "Update your listing details"}
         </p>
       </div>
@@ -193,7 +193,7 @@ export default function EditListingForm({ listing, isLocked }: EditListingFormPr
         <div className="flex items-start gap-3 rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3">
           <Info size={16} className="mt-0.5 shrink-0 text-amber-400" />
           <p className="text-sm text-amber-200">
-            This listing has an active deal. You can still update{" "}
+            There's an open request on this listing. You can still update{" "}
             <span className="font-medium">description, pickup hostel, department, year</span>
             . Other details are locked to protect the buyer.
           </p>

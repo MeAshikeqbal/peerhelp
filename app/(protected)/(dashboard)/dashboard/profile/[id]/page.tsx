@@ -163,12 +163,10 @@ async function ProfileContent({ id }: { id: string }) {
 
   const raterIds = [...new Set(ratings.map((r) => r.rater_id))];
   const nameMap: Record<string, string> = {};
-  const avatarMap: Record<string, string | null> = {};
   if (raterIds.length > 0) {
     const { data: raterProfiles } = await getProfilesByIds(supabase, raterIds);
     for (const p of raterProfiles ?? []) {
       if (p.full_name) nameMap[p.id] = p.full_name;
-      avatarMap[p.id] = p.avatar_url ?? null;
     }
   }
 
@@ -318,7 +316,7 @@ async function ProfileContent({ id }: { id: string }) {
           <div className="divide-y divide-white/[0.05] border-t border-overlay/[0.05]">
             {ratings.map((r) => (
               <div key={r.id} className="flex items-start gap-4 px-6 py-4">
-                <UserAvatar size="sm" name={nameMap[r.rater_id] ?? "Student"} src={avatarMap[r.rater_id] ?? undefined} />
+                <UserAvatar size="sm" name={nameMap[r.rater_id] ?? "Student"} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-sm font-medium text-foreground">

@@ -74,7 +74,7 @@ export async function PATCH(
         return NextResponse.json(
           {
             message:
-              "This listing has an active deal. Some details are locked to protect the buyer.",
+              "There's an open request on this listing. Some details are locked to protect the buyer.",
             code: "listing_locked",
             lockedFields: submittedLocked,
           },

@@ -27,7 +27,8 @@ const EVENT_META: Record<
   deal_requested: {
     subject: "Someone wants to buy your listing",
     cta: "Review deal request",
-    ctaHref: () => `${appUrl}/dashboard/deals`,
+    ctaHref: (dealId) =>
+      dealId ? `${appUrl}/dashboard/deals` : `${appUrl}/dashboard/deals`,
   },
   deal_accepted: {
     subject: "Your deal request was accepted",

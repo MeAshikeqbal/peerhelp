@@ -9,13 +9,10 @@ export async function ProfileIncompleteBanner() {
   const { user, error: userError } = await getCurrentUser(supabase);
   if (userError || !user) return null;
 
-  const [profileResult, phoneResult] = await Promise.all([
+  const [{ data: profile }, { data: phoneData }] = await Promise.all([
     getProfileById(supabase, user.id),
     getOwnPhone(supabase),
   ]);
-  if (profileResult.error || phoneResult.error) return null;
-  const profile = profileResult.data;
-  const phoneData = phoneResult.data;
   if (!profile) return null;
 
   const missingFields: string[] = [];
