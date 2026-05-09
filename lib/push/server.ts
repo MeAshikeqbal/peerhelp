@@ -50,8 +50,8 @@ export async function sendPushToUser(
 ): Promise<void> {
   try {
     ensureInit();
-  } catch {
-    // VAPID not configured — skip silently in envs without push keys
+  } catch (err) {
+    console.warn("Web Push not configured — skipping push sends.", err ?? "");
     return;
   }
 
@@ -62,7 +62,11 @@ export async function sendPushToUser(
     .select("endpoint, p256dh, auth")
     .eq("user_id", userId);
 
-  if (error || !subs || (subs as unknown[]).length === 0) return;
+  if (error) {
+    console.error("sendPushToUser: failed query push_subscriptions", error);
+    return;
+  }
+  if (!subs || (subs as unknown[]).length === 0) return;
 
   const targetUrl =
     payload.url ?? (payload.type ? TYPE_URL[payload.type] : "/dashboard");
@@ -84,12 +88,18 @@ export async function sendPushToUser(
       } catch (err) {
         // Prune expired/invalid subscriptions (410 Gone, 404 Not Found)
         const status = (err as { statusCode?: number }).statusCode;
+        console.warn("sendPushToUser: push send error", { endpoint: sub.endpoint, status, err });
         if (status === 410 || status === 404) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await (admin as any)
-            .from("push_subscriptions")
-            .delete()
-            .eq("endpoint", sub.endpoint);
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (admin as any)
+              .from("push_subscriptions")
+              .delete()
+              .eq("endpoint", sub.endpoint);
+            console.info("sendPushToUser: removed stale push subscription", sub.endpoint);
+          } catch (delErr) {
+            console.error("sendPushToUser: failed to delete stale subscription", delErr);
+          }
         }
       }
     }

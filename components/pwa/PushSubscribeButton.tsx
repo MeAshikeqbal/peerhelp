@@ -13,6 +13,7 @@ export function PushSubscribeButton() {
   const [supported, setSupported] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export function PushSubscribeButton() {
   const handleToggle = () => {
     startTransition(async () => {
       try {
+        setError(null);
         if (subscribed) {
           await unsubscribeUserFromPush();
           setSubscribed(false);
@@ -38,6 +40,8 @@ export function PushSubscribeButton() {
         }
       } catch (err) {
         setPermission(Notification.permission);
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message || "Failed to update push subscription");
         console.error("[PushSubscribeButton]", err);
       }
     });
@@ -64,11 +68,16 @@ export function PushSubscribeButton() {
               Blocked in browser — enable in site settings to subscribe
             </p>
           ) : (
-            <p className="text-[11px] text-shade-50 mt-0.5">
-              {subscribed
-                ? "You'll receive push alerts on this device"
-                : "Get alerts for deals, messages & more"}
-            </p>
+            <div>
+              <p className="text-[11px] text-shade-50 mt-0.5">
+                {subscribed
+                  ? "You'll receive push alerts on this device"
+                  : "Get alerts for deals, messages & more"}
+              </p>
+              {error && (
+                <p className="text-[11px] text-rose-400 mt-1">{error}</p>
+              )}
+            </div>
           )}
         </div>
       </div>
