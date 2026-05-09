@@ -41,18 +41,6 @@ interface MarketplacePageProps {
 async function MarketplaceContent({ searchParams }: { searchParams: Promise<SearchParamsRaw> }) {
   const sp = await searchParams;
 
-  const filters = {
-    q: sp.q,
-    type: sp.type,
-    condition: sp.condition,
-    year: sp.year ? parseInt(sp.year) : undefined,
-    minPrice: sp.minPrice ? parseInt(sp.minPrice) : undefined,
-    maxPrice: sp.maxPrice ? parseInt(sp.maxPrice) : undefined,
-    college: sp.college,
-    transaction_type: sp.transaction_type,
-    page: parseInt(sp.page || "1"),
-  };
-
   const pageSize = 12;
 
   const supabase = await createClient();
@@ -64,6 +52,18 @@ async function MarketplaceContent({ searchParams }: { searchParams: Promise<Sear
     const { data: myProfile } = await getProfileById(supabase, user.id);
     myCollegeName = myProfile?.college_name ?? undefined;
   }
+
+  const filters = {
+    q: sp.q,
+    type: sp.type,
+    condition: sp.condition,
+    year: sp.year ? parseInt(sp.year) : undefined,
+    minPrice: sp.minPrice ? parseInt(sp.minPrice) : undefined,
+    maxPrice: sp.maxPrice ? parseInt(sp.maxPrice) : undefined,
+    college: sp.college ?? (user && myCollegeName ? "mine" : undefined),
+    transaction_type: sp.transaction_type,
+    page: parseInt(sp.page || "1"),
+  };
 
   let peerIds: string[] | undefined;
   if (filters.college === "mine" && myCollegeName) {

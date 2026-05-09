@@ -44,7 +44,7 @@ export function ListingsFilterSheet({
     filters.condition,
     filters.hostel,
     filters.department,
-    filters.college,
+    filters.college === "mine" ? filters.college : undefined,
     filters.transaction_type,
     filters.year != null ? String(filters.year) : undefined,
     filters.minPrice != null ? String(filters.minPrice) : undefined,

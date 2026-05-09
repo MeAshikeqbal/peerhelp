@@ -97,7 +97,7 @@ export function ListingsFilters({
   const hasActiveFilters =
     filters.q || filters.type || filters.condition || filters.hostel ||
     filters.department || filters.year || filters.minPrice !== undefined ||
-    filters.maxPrice !== undefined || filters.college || filters.transaction_type;
+    filters.maxPrice !== undefined || (filters.college && filters.college !== "all") || filters.transaction_type;
 
   return (
     <div className="space-y-5">
@@ -124,13 +124,13 @@ export function ListingsFilters({
             <SectionLabel>College</SectionLabel>
             <div className="space-y-1">
               {[
-                { value: "", label: "All colleges" },
                 { value: "mine", label: "My college only" },
+                { value: "all", label: "All colleges" },
               ].map((opt) => (
                 <FilterOption
                   key={opt.value}
-                  active={(filters.college ?? "") === opt.value}
-                  onClick={() => router.push(buildUrl({ college: opt.value || undefined }))}
+                  active={(filters.college ?? "mine") === opt.value}
+                  onClick={() => router.push(buildUrl({ college: opt.value }))}
                   label={opt.label}
                 />
               ))}
