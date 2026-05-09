@@ -45,7 +45,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="inline-flex items-center gap-2 rounded-full border border-neon-green/20 bg-neon-green/5 px-4 py-1.5 text-xs text-neon-green/80 backdrop-blur-sm"
+          className="inline-flex items-center gap-2 rounded-full border border-neon-green/20 bg-neon-green/5 px-4 py-1.5 text-xs text-neon-green/80"
         >
           <span className="inline-flex h-1.5 w-1.5 rounded-full bg-neon-green animate-pulse" />
           Student-only campus marketplace
@@ -86,7 +86,7 @@ export function HeroSection() {
               <ArrowRight size={16} />
             </Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-border/60 backdrop-blur-sm hover:border-neon-green/40">
+          <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-border/60 hover:border-neon-green/40">
             <Link href="/marketplace">Browse marketplace</Link>
           </Button>
         </motion.div>

@@ -42,7 +42,7 @@ export function PublicNav() {
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease }}
-      className="sticky top-0 z-40 border-b border-overlay/[0.06] bg-background/80 backdrop-blur-md"
+      className="sticky top-0 z-40 border-b border-overlay/[0.06] bg-background/80 backdrop-blur-md safe-area-top"
     >
       <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 h-16 md:px-10 lg:px-16">
         <Logo href="/" className="text-lg" />
