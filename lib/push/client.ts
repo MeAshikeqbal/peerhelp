@@ -4,7 +4,7 @@
  */
 
 /** Convert VAPID public key (URL-safe base64) to Uint8Array for pushManager.subscribe */
-export function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
+export function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = window.atob(base64);
@@ -12,7 +12,7 @@ export function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   for (let i = 0; i < rawData.length; i++) {
     output[i] = rawData.charCodeAt(i);
   }
-  return output.buffer as ArrayBuffer;
+  return output;
 }
 
 export function isPushSupported(): boolean {
@@ -26,14 +26,29 @@ export function isPushSupported(): boolean {
 
 export async function subscribeUserToPush(): Promise<void> {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  if (!publicKey) throw new Error("NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set");
+  if (!publicKey) {
+    throw new Error("VAPID public key not configured (NEXT_PUBLIC_VAPID_PUBLIC_KEY)");
+  }
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
     throw new Error("Notification permission denied");
   }
 
+  // Ensure a service worker is registered — register on-demand if missing.
+  try {
+    const existing = await navigator.serviceWorker.getRegistration();
+    if (!existing) {
+      // register the app service worker at root
+      await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    }
+  } catch (err) {
+    console.warn("Failed to ensure service worker registration:", err);
+  }
+
   const registration = await navigator.serviceWorker.ready;
+
+  // Subscribe with application server key
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(publicKey),
@@ -59,17 +74,21 @@ export async function subscribeUserToPush(): Promise<void> {
 }
 
 export async function unsubscribeUserFromPush(): Promise<void> {
-  const registration = await navigator.serviceWorker.ready;
-  const subscription = await registration.pushManager.getSubscription();
-  if (!subscription) return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (!subscription) return;
 
-  await fetch("/api/push/subscribe", {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ endpoint: subscription.endpoint }),
-  });
+    await fetch("/api/push/subscribe", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endpoint: subscription.endpoint }),
+    });
 
-  await subscription.unsubscribe();
+    await subscription.unsubscribe();
+  } catch (err) {
+    console.warn("unsubscribeUserFromPush failed:", err);
+  }
 }
 
 export async function getCurrentPushSubscription(): Promise<PushSubscription | null> {
