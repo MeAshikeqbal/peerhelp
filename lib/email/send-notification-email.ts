@@ -4,7 +4,7 @@ import { buildNotificationHtml } from "./templates";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
 const fromName = process.env.RESEND_FROM_NAME ?? "PeerHelp";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://peerhelp.app";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://peerhelp.space";
 
 export type NotificationEmailType =
   | "deal_requested"
@@ -27,8 +27,7 @@ const EVENT_META: Record<
   deal_requested: {
     subject: "Someone wants to buy your listing",
     cta: "Review deal request",
-    ctaHref: (dealId) =>
-      dealId ? `${appUrl}/dashboard/deals` : `${appUrl}/dashboard/deals`,
+    ctaHref: () => `${appUrl}/dashboard/deals`,
   },
   deal_accepted: {
     subject: "Your deal request was accepted",

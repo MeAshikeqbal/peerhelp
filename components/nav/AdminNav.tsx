@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/nav/NotificationBell";
+import { UserAvatar, getInitials } from "@/components/ui/user-avatar";
 import {
   Sheet,
   SheetContent,
@@ -20,13 +21,7 @@ interface NavUser {
   email: string;
   initials: string;
   isSuperAdmin: boolean;
-}
-
-function getInitials(email: string) {
-  const local = email.split("@")[0];
-  const parts = local.split(/[._-]/);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return local.slice(0, 2).toUpperCase();
+  avatarUrl: string | null;
 }
 
 export function AdminNav({
@@ -41,7 +36,7 @@ export function AdminNav({
   email?: string | null;
 }) {
   const [user, setUser] = useState<NavUser | null>(
-    email ? { email, initials: getInitials(email), isSuperAdmin } : null,
+    email ? { email, initials: getInitials(null, email), isSuperAdmin, avatarUrl: null } : null,
   );
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
@@ -49,14 +44,18 @@ export function AdminNav({
   const router = useRouter();
 
   useEffect(() => {
-    if (user) return;
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
-      if (u?.email) {
-        setUser({ email: u.email, initials: getInitials(u.email), isSuperAdmin });
-      }
+    supabase.auth.getUser().then(async ({ data: { user: u } }) => {
+      if (!u?.email) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", u.id)
+        .maybeSingle();
+      setUser({ email: u.email, initials: getInitials(null, u.email), isSuperAdmin, avatarUrl: profile?.avatar_url ?? null });
     });
-  }, [user, isSuperAdmin]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     setAvatarOpen(false);
@@ -144,9 +143,12 @@ export function AdminNav({
                   onClick={() => setAvatarOpen((v) => !v)}
                   className="flex items-center gap-2 rounded-full pl-1 pr-2 py-1 hover:bg-overlay/5 transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neon-green/15 border border-neon-green/20 text-neon-green text-xs font-semibold select-none">
-                    {user.initials}
-                  </div>
+                  <UserAvatar
+                    size="sm"
+                    src={user.avatarUrl}
+                    email={user.email}
+                    className="border border-neon-green/20"
+                  />
                   <ChevronDown
                     size={14}
                     className={`text-shade-50 transition-transform duration-200 ${avatarOpen ? "rotate-180" : ""}`}
@@ -224,9 +226,12 @@ export function AdminNav({
                 <div className="mt-auto border-t border-border px-4 py-5 flex flex-col gap-1">
                   {user && (
                     <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neon-green/15 border border-neon-green/20 text-neon-green text-xs font-semibold">
-                        {user.initials}
-                      </div>
+                      <UserAvatar
+                        size="sm"
+                        src={user.avatarUrl}
+                        email={user.email}
+                        className="shrink-0 border border-neon-green/20"
+                      />
                       <div className="min-w-0">
                         <p className="text-sm text-shade-50 truncate">{user.email}</p>
                         {user.isSuperAdmin && (

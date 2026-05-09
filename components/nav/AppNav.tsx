@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/nav/NotificationBell";
+import { UserAvatar, getInitials } from "@/components/ui/user-avatar";
 import {
   Sheet,
   SheetContent,
@@ -19,13 +20,7 @@ import {
 interface NavUser {
   email: string;
   initials: string;
-}
-
-function getInitials(email: string) {
-  const local = email.split("@")[0];
-  const parts = local.split(/[._-]/);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return local.slice(0, 2).toUpperCase();
+  avatarUrl: string | null;
 }
 
 export function AppNav({ pendingDealsCount = 0, pendingTutorRequestsCount = 0, unreadMessagesCount = 0 }: { pendingDealsCount?: number; pendingTutorRequestsCount?: number; unreadMessagesCount?: number }) {
@@ -37,8 +32,18 @@ export function AppNav({ pendingDealsCount = 0, pendingTutorRequestsCount = 0, u
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
-      if (u?.email) setUser({ email: u.email, initials: getInitials(u.email) });
+    supabase.auth.getUser().then(async ({ data: { user: u } }) => {
+      if (!u?.email) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", u.id)
+        .maybeSingle();
+      setUser({
+        email: u.email,
+        initials: getInitials(null, u.email),
+        avatarUrl: profile?.avatar_url ?? null,
+      });
     });
   }, []);
 
@@ -109,9 +114,12 @@ export function AppNav({ pendingDealsCount = 0, pendingTutorRequestsCount = 0, u
                   onClick={() => setAvatarOpen((v) => !v)}
                   className="flex items-center gap-2 rounded-full pl-1 pr-2 py-1 hover:bg-overlay/5 transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neon-green/15 border border-neon-green/20 text-neon-green text-xs font-semibold select-none">
-                    {user.initials}
-                  </div>
+                  <UserAvatar
+                    size="sm"
+                    src={user.avatarUrl}
+                    email={user.email}
+                    className="border border-neon-green/20"
+                  />
                   <ChevronDown
                     size={14}
                     className={`text-shade-50 transition-transform duration-200 ${avatarOpen ? "rotate-180" : ""}`}
@@ -190,9 +198,12 @@ export function AppNav({ pendingDealsCount = 0, pendingTutorRequestsCount = 0, u
                 <div className="mt-auto border-t border-border px-4 py-5 flex flex-col gap-1">
                   {user && (
                     <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neon-green/15 border border-neon-green/20 text-neon-green text-xs font-semibold">
-                        {user.initials}
-                      </div>
+                      <UserAvatar
+                        size="sm"
+                        src={user.avatarUrl}
+                        email={user.email}
+                        className="shrink-0 border border-neon-green/20"
+                      />
                       <span className="text-sm text-shade-50 truncate">{user.email}</span>
                     </div>
                   )}

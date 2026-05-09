@@ -199,6 +199,7 @@ export default async function ListingDetailPage({
           <SellerCard
             sellerId={listing.user_id}
             sellerName={sellerData?.full_name ?? "Student"}
+            sellerAvatarUrl={sellerData?.avatar_url ?? null}
             isSeller={isSeller}
             avgRating={avgRating}
             ratingCount={ratingCount}

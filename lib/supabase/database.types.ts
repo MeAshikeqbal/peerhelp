@@ -545,6 +545,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           college_domain: string | null
           college_email: string | null
           college_name: string | null
@@ -556,6 +557,7 @@ export type Database = {
           verification_status: Database["public"]["Enums"]["verification_status"]
         }
         Insert: {
+          avatar_url?: string | null
           college_domain?: string | null
           college_email?: string | null
           college_name?: string | null
@@ -567,6 +569,7 @@ export type Database = {
           verification_status?: Database["public"]["Enums"]["verification_status"]
         }
         Update: {
+          avatar_url?: string | null
           college_domain?: string | null
           college_email?: string | null
           college_name?: string | null
@@ -576,6 +579,36 @@ export type Database = {
           phone_number?: string | null
           updated_at?: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }

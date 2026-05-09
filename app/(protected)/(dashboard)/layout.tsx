@@ -3,6 +3,7 @@ import { AppNav } from "@/components/nav/AppNav";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadMessagesCount } from "@/utils/query/messages";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { ProfileIncompleteBanner } from "@/components/profile/ProfileIncompleteBanner";
 
 async function NavWithPending() {
   const supabase = await createClient();
@@ -50,6 +51,10 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-void">
       <Suspense fallback={<div className="h-16 border-b border-border bg-forest/80" />}>
         <NavWithPending />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <ProfileIncompleteBanner />
       </Suspense>
 
       <main className="mx-auto max-w-[1280px] px-6 py-10 md:px-10 lg:px-16">

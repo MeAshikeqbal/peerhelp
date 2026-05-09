@@ -6,7 +6,7 @@ import {
   BookOpen, Handshake, GraduationCap,
   Mail, Building2, KeyRound, ChevronRight, Phone, Bell, Ban,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { PhoneForm } from "@/components/profile/PhoneForm";
 import { ReverifyButton } from "@/components/profile/ReverifyButton";
@@ -18,18 +18,6 @@ import { getProfileById, getOwnPhone } from "@/utils/query/profiles";
 import { countUserListings } from "@/utils/query/listings";
 import { countUserDeals } from "@/utils/query/deals";
 import { getNotificationPrefs } from "@/utils/query/notifications";
-
-function getInitials(name: string, email: string) {
-  if (name?.trim()) {
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-  const local = email.split("@")[0];
-  const parts = local.split(/[._-]/);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return local.slice(0, 2).toUpperCase();
-}
 
 function VerificationBadge({ status }: { status: string | null }) {
   if (status === "verified") {
@@ -72,7 +60,6 @@ export default async function ProfilePage() {
 
   const phoneNumber = (phoneData as string | null) ?? null;
 
-  const initials = getInitials(profile?.full_name ?? "", user.email ?? "U");
   const displayName = profile?.full_name?.trim() || user.email?.split("@")[0] || "Student";
 
   return (
@@ -89,11 +76,11 @@ export default async function ProfilePage() {
           <div className="pointer-events-none absolute -bottom-10 right-10 h-48 w-48 rounded-full bg-neon-green/5 blur-2xl" />
 
           <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 px-5 py-6 sm:px-7 sm:py-8">
-            <Avatar className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 ring-2 ring-neon-green/20 ring-offset-2 ring-offset-forest">
-              <AvatarFallback className="bg-neon-green/10 text-neon-green text-2xl font-bold font-display">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <AvatarUploader
+              currentUrl={profile?.avatar_url ?? null}
+              name={profile?.full_name ?? null}
+              email={user.email ?? ""}
+            />
 
             <div className="flex-1 min-w-0">
               <ProfileForm initialName={profile?.full_name ?? ""} displayName={displayName} />

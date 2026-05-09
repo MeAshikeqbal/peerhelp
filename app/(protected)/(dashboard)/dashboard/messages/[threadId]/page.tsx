@@ -34,7 +34,7 @@ export default async function ThreadPage({
   const [{ data: msgsDesc }, { data: profile }, { data: myCursor }, { data: theirCursor }, blocked] =
     await Promise.all([
       getThreadMessages(supabase, threadId, { limit: 50 }),
-      supabase.from("profiles").select("full_name").eq("id", counterpartId).maybeSingle(),
+      supabase.from("profiles").select("full_name, avatar_url").eq("id", counterpartId).maybeSingle(),
       getMyReadCursor(supabase, threadId, user.id),
       getCounterpartReadCursor(supabase, threadId, counterpartId),
       isBlockedByMe(supabase, counterpartId),
@@ -42,6 +42,7 @@ export default async function ThreadPage({
 
   const messages = (msgsDesc ?? []).slice().reverse();
   const counterpartName = profile?.full_name ?? "Unknown user";
+  const counterpartAvatarUrl = profile?.avatar_url ?? null;
 
   const contextType = thread.context_type as "deal" | "tutor_request";
   const contextHref =
@@ -53,6 +54,7 @@ export default async function ThreadPage({
       currentUserId={user.id}
       counterpartId={counterpartId}
       counterpartName={counterpartName}
+      counterpartAvatarUrl={counterpartAvatarUrl}
       initialMessages={messages}
       initialMyReadAt={myCursor?.last_read_at ?? null}
       initialTheirReadAt={theirCursor?.last_read_at ?? null}

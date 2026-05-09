@@ -11,7 +11,7 @@ export async function getProfileById(
 ) {
   return supabase
     .from("profiles")
-    .select("id, full_name, college_name, college_email, verification_status")
+    .select("id, full_name, college_name, college_email, verification_status, avatar_url")
     .eq("id", userId)
     .single();
 }
@@ -44,7 +44,7 @@ export async function getSellerProfile(
 ) {
   return supabase
     .from("profiles")
-    .select("full_name, college_name")
+    .select("full_name, college_name, avatar_url")
     .eq("id", sellerUserId)
     .single();
 }
@@ -56,7 +56,7 @@ export async function getProfilesByIds(
 ) {
   return supabase
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, avatar_url")
     .in("id", ids);
 }
 
@@ -117,7 +117,7 @@ export async function getPublicProfile(
 ) {
   return supabase
     .from("profiles")
-    .select("id, full_name, college_name, created_at")
+    .select("id, full_name, college_name, created_at, avatar_url")
     .eq("id", userId)
     .single();
 }
