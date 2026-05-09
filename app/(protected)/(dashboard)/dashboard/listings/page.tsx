@@ -46,6 +46,8 @@ async function ListingsContent({ searchParams }: ListingsPageProps) {
 
   const sp = await searchParams;
 
+  const collegeName = profile?.college_name;
+
   const filters = {
     q: sp.q,
     type: sp.type,
@@ -55,14 +57,13 @@ async function ListingsContent({ searchParams }: ListingsPageProps) {
     year: sp.year ? parseInt(sp.year) : undefined,
     minPrice: sp.minPrice ? parseInt(sp.minPrice) : undefined,
     maxPrice: sp.maxPrice ? parseInt(sp.maxPrice) : undefined,
-    college: sp.college,
+    college: sp.college ?? (collegeName ? "mine" : undefined),
     transaction_type: sp.transaction_type,
     page: parseInt(sp.page || "1"),
   };
 
   // Resolve college filter to peer ids
   let peerIds: string[] | undefined;
-  const collegeName = profile?.college_name;
   if (filters.college === "mine" && collegeName) {
     const { data: peers } = await getPeerIdsByCollege(supabase, collegeName);
     peerIds = (peers ?? []).map((p) => p.id);
